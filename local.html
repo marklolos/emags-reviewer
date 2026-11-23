@@ -1,0 +1,1964 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ECEN 402 Electromagnetics - ECE Board Exam Command Center</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            navy: {
+              900: '#070a12',
+              800: '#0b1120',
+              700: '#111827',
+              600: '#1f2937',
+              500: '#374151'
+            },
+            cyan: {
+              400: '#38bdf8',
+              500: '#06b6d4',
+              600: '#0891b2'
+            },
+            emerald: {
+              400: '#34d399',
+              500: '#10b981',
+              600: '#059669'
+            },
+            amber: {
+              400: '#fbbf24',
+              500: '#f59e0b',
+              600: '#d97706'
+            },
+            rose: {
+              400: '#fb7185',
+              500: '#f43f5e',
+              600: '#e11d48'
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+            mono: ['JetBrains Mono', 'Fira Code', 'monospace']
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    /* Custom Scrollbars */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #0b1120;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #1f2937;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #374151;
+    }
+
+    /* Mathematical Typography & Components */
+    .math-font {
+      font-family: 'Georgia', 'Times New Roman', serif;
+      font-style: italic;
+    }
+    .vec-symbol {
+      font-weight: bold;
+      font-style: normal;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .frac {
+      display: inline-flex;
+      flex-direction: column;
+      vertical-align: middle;
+      text-align: center;
+      padding: 0 4px;
+    }
+    .frac .num {
+      border-bottom: 1px solid currentColor;
+      padding-bottom: 1px;
+      font-size: 0.9em;
+    }
+    .frac .den {
+      padding-top: 1px;
+      font-size: 0.9em;
+    }
+    .radicand {
+      border-top: 1px solid currentColor;
+      padding-top: 1px;
+      margin-left: 1px;
+    }
+
+    /* Styled Calculator Keycaps */
+    kbd.calc-key {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2px 6px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem;
+      font-weight: 700;
+      border-radius: 4px;
+      box-shadow: 0 2px 0 rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.2);
+      border: 1px solid rgba(255,255,255,0.15);
+      margin: 0 2px;
+      user-select: none;
+    }
+    kbd.key-gold { background: linear-gradient(180deg, #f59e0b 0%, #b45309 100%); color: #ffffff; text-shadow: 0 1px 2px rgba(0,0,0,0.6); }
+    kbd.key-purple { background: linear-gradient(180deg, #8b5cf6 0%, #6d28d9 100%); color: #ffffff; text-shadow: 0 1px 2px rgba(0,0,0,0.6); }
+    kbd.key-cyan { background: linear-gradient(180deg, #0284c7 0%, #0369a1 100%); color: #ffffff; text-shadow: 0 1px 2px rgba(0,0,0,0.6); }
+    kbd.key-dark { background: linear-gradient(180deg, #374151 0%, #1f2937 100%); color: #f3f4f6; }
+    kbd.key-rose { background: linear-gradient(180deg, #f43f5e 0%, #be123c 100%); color: #ffffff; }
+
+    /* Canvas FX */
+    #confetti-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 100;
+    }
+
+    /* Pulse Glows */
+    .glow-cyan { box-shadow: 0 0 15px rgba(56, 189, 248, 0.25); }
+    .glow-emerald { box-shadow: 0 0 15px rgba(16, 185, 129, 0.3); }
+    .glow-rose { box-shadow: 0 0 15px rgba(244, 63, 94, 0.3); }
+  </style>
+</head>
+<body class="bg-navy-900 text-slate-100 min-h-screen flex flex-col font-sans selection:bg-cyan-500 selection:text-navy-900 antialiased">
+  
+  <!-- Canvas Overlay for Particle Confetti -->
+  <canvas id="confetti-canvas"></canvas>
+
+  <!-- MICRO-TOAST NOTIFICATIONS CONTAINER -->
+  <div id="toast-container" class="fixed top-20 right-4 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+  <!-- TOP HUD BAR -->
+  <header class="bg-navy-800/90 backdrop-blur border-b border-navy-600 sticky top-0 z-40 px-4 py-3 shadow-lg">
+    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
+      
+      <!-- Logo & Subject Banner -->
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center font-mono font-bold text-lg text-white shadow-md">
+          ∇
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 class="font-bold text-base md:text-lg text-white tracking-wide">ECEN 402 Electromagnetics</h1>
+            <span class="px-2 py-0.5 text-xs font-semibold rounded bg-cyan-500/20 text-cyan-400 border border-cyan-500/30">Vector Analysis & Integrals</span>
+          </div>
+          <p class="text-xs text-slate-400">Board Exam Simulation & Active Recall Command Center</p>
+        </div>
+      </div>
+
+      <!-- Mode Switcher Buttons -->
+      <div class="flex items-center bg-navy-900 p-1 rounded-xl border border-navy-600 text-xs font-semibold">
+        <button id="btn-mode-drill" onclick="app.switchMode('drill')" class="px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 bg-cyan-500 text-navy-900 shadow">
+          <span>⚡ Active Recall</span>
+        </button>
+        <button id="btn-mode-sim" onclick="app.switchMode('sim')" class="px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 text-slate-300 hover:text-white">
+          <span>🎯 Board Exam (20Q)</span>
+        </button>
+        <button id="btn-mode-variant" onclick="app.switchMode('variant')" class="px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 text-slate-300 hover:text-white">
+          <span>🧪 Board Twists</span>
+        </button>
+      </div>
+
+      <!-- Live Gamification Stats HUD & Controls -->
+      <div class="flex items-center gap-3">
+        <!-- Streak & XP -->
+        <div class="hidden sm:flex items-center gap-3 bg-navy-700/80 px-3 py-1.5 rounded-xl border border-navy-600 text-xs">
+          <div class="flex items-center gap-1 text-amber-400 font-bold" title="Current Active Streak">
+            <span>🔥</span>
+            <span id="hud-streak">0</span>x
+          </div>
+          <div class="h-4 w-px bg-navy-600"></div>
+          <div class="flex flex-col">
+            <div class="flex justify-between items-center text-[10px] text-slate-400 gap-2">
+              <span id="hud-rank" class="text-cyan-400 font-medium">ECE Reviewee</span>
+              <span id="hud-xp-text" class="font-mono font-bold text-amber-400">0 XP</span>
+            </div>
+            <div class="w-24 bg-navy-900 h-1.5 rounded-full overflow-hidden mt-0.5">
+              <div id="hud-xp-bar" class="bg-gradient-to-r from-cyan-400 to-amber-400 h-full w-0 transition-all duration-300"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Mute Audio Toggle -->
+        <button id="btn-audio-toggle" onclick="app.toggleAudio()" class="p-2 rounded-xl bg-navy-700 border border-navy-600 text-slate-300 hover:text-amber-400 transition" title="Toggle Sound FX">
+          <span id="audio-icon">🔊</span>
+        </button>
+
+        <!-- Cheat Sheet Modal Button -->
+        <button onclick="app.openModal('cheatsheet-modal')" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-amber-500/20 to-amber-600/20 border border-amber-500/40 text-amber-300 hover:bg-amber-500/30 text-xs font-semibold transition">
+          <span>🧮 Calc & Formulas</span>
+        </button>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- MAIN APP CONTAINER -->
+  <main class="flex-1 max-w-7xl w-full mx-auto p-4 md:p-6 flex flex-col gap-6">
+
+    <!-- DRILL & TWISTS MODE VIEW CONTAINER -->
+    <div id="quiz-view" class="flex flex-col gap-6">
+      
+      <!-- Options Bar & Filter Bar -->
+      <div class="bg-navy-800 rounded-2xl border border-navy-600 p-4 flex flex-wrap items-center justify-between gap-4">
+        <div class="flex items-center gap-3">
+          <span id="quiz-badge" class="px-3 py-1 text-xs font-bold rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">
+            Active Recall Mode
+          </span>
+          <span id="question-progress-label" class="text-xs text-slate-400 font-mono">
+            Question <span id="current-q-num" class="text-white font-bold">1</span> of <span id="total-q-num" class="text-white font-bold">28</span>
+          </span>
+        </div>
+
+        <!-- Toggles for Shuffle -->
+        <div class="flex items-center gap-4 text-xs">
+          <label class="flex items-center gap-2 cursor-pointer text-slate-300 hover:text-white">
+            <input type="checkbox" id="toggle-shuffle-q" checked onchange="app.onSettingsChange()" class="rounded bg-navy-900 border-navy-600 text-cyan-500 focus:ring-0">
+            <span>Shuffle Questions</span>
+          </label>
+          <label class="flex items-center gap-2 cursor-pointer text-slate-300 hover:text-white">
+            <input type="checkbox" id="toggle-shuffle-c" checked onchange="app.onSettingsChange()" class="rounded bg-navy-900 border-navy-600 text-cyan-500 focus:ring-0">
+            <span>Shuffle Choices</span>
+          </label>
+          <button onclick="app.resetDrill()" class="text-slate-400 hover:text-amber-400 text-xs font-semibold underline">
+            Reset Progress
+          </button>
+        </div>
+      </div>
+
+      <!-- MAIN QUESTION CARD -->
+      <div id="question-card" class="bg-navy-800 rounded-2xl border border-navy-600 p-6 md:p-8 shadow-xl relative overflow-hidden flex flex-col gap-6 transition-all duration-300">
+        
+        <!-- Question Meta & Category -->
+        <div class="flex items-center justify-between gap-2 border-b border-navy-600/60 pb-3">
+          <div class="flex items-center gap-2">
+            <span id="q-topic-tag" class="px-2.5 py-0.5 rounded-md text-xs font-semibold bg-navy-700 text-amber-400 border border-amber-500/30">
+              [Vectors]
+            </span>
+            <span id="q-source-tag" class="text-[11px] font-mono text-slate-400">
+              Exam Item #1
+            </span>
+          </div>
+          <span class="text-xs text-slate-500 font-mono hidden sm:inline">Keys: [1-4] or [A-D] | [Enter] Next</span>
+        </div>
+
+        <!-- Question Body Text -->
+        <div id="q-text-body" class="text-base md:text-xl font-medium text-slate-100 leading-relaxed font-sans">
+          <!-- Populated by JS -->
+        </div>
+
+        <!-- Options Grid (A, B, C, D) -->
+        <div id="options-grid" class="grid grid-cols-1 md:grid-cols-2 gap-3 mt-2">
+          <!-- Option Buttons Populated by JS -->
+        </div>
+
+        <!-- REWARD MICRO-TOAST / INSTANT STATUS BANNER -->
+        <div id="instant-feedback-banner" class="hidden p-4 rounded-xl border flex items-center justify-between gap-4 transition-all animate-fadeIn">
+          <div class="flex items-center gap-3">
+            <div id="feedback-icon-box" class="w-8 h-8 rounded-full flex items-center justify-center font-bold text-lg"></div>
+            <div>
+              <h4 id="feedback-title" class="font-bold text-sm"></h4>
+              <p id="feedback-sub" class="text-xs text-slate-300"></p>
+            </div>
+          </div>
+          <button id="btn-toggle-solution" onclick="app.toggleSolutionVisibility()" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-navy-700 text-slate-200 border border-navy-500 hover:bg-navy-600 transition">
+            📝 Show/Hide Solution Breakdown
+          </button>
+        </div>
+
+        <!-- DUAL-METHOD COACHING PANEL (EXPANDABLE) -->
+        <div id="solution-coaching-card" class="hidden flex flex-col gap-4 border-t border-navy-600/80 pt-6 mt-2">
+          
+          <div class="flex items-center justify-between">
+            <h3 class="font-bold text-sm text-cyan-400 flex items-center gap-2">
+              <span>🧠 Board Review Dual-Method Solution</span>
+            </h3>
+            <span class="text-xs text-slate-400">Manual Algebra vs Canon F-789SGA Shortcuts</span>
+          </div>
+
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            
+            <!-- PANEL 1: MANUAL STEP-BY-STEP -->
+            <div class="bg-navy-900/90 rounded-xl p-4 border border-navy-600 flex flex-col gap-3">
+              <div class="flex items-center gap-2 border-b border-navy-700 pb-2">
+                <span class="text-base">📝</span>
+                <h4 class="font-bold text-xs uppercase tracking-wider text-emerald-400">Manual Step-by-Step Solution</h4>
+              </div>
+              <div id="manual-solution-body" class="text-xs md:text-sm text-slate-300 leading-relaxed font-sans space-y-2">
+                <!-- Populated by JS -->
+              </div>
+            </div>
+
+            <!-- PANEL 2: CANON F-789SGA CALC TECHNIQUE & TRAP ALERT -->
+            <div class="bg-navy-900/90 rounded-xl p-4 border border-amber-500/30 flex flex-col gap-3">
+              <div class="flex items-center gap-2 border-b border-navy-700 pb-2">
+                <span class="text-base">🧮</span>
+                <h4 class="font-bold text-xs uppercase tracking-wider text-amber-400">Canon F-789SGA Keystroke Technique</h4>
+              </div>
+              <div id="calc-solution-body" class="text-xs md:text-sm text-slate-300 leading-relaxed font-sans space-y-2">
+                <!-- Populated by JS -->
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Bottom Navigation & Controls -->
+        <div class="flex items-center justify-between border-t border-navy-600/60 pt-4 mt-2">
+          <button id="btn-prev-q" onclick="app.prevQuestion()" class="px-4 py-2 rounded-xl bg-navy-700 text-slate-300 hover:text-white border border-navy-600 text-xs font-semibold transition disabled:opacity-40">
+            ← Previous
+          </button>
+
+          <div class="flex items-center gap-3">
+            <button id="btn-next-q" onclick="app.nextQuestion()" class="px-6 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 text-navy-900 font-bold hover:brightness-110 text-xs transition shadow-md flex items-center gap-1.5">
+              <span>Next Question</span>
+              <span>→</span>
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- BOARD EXAM SIMULATION MODE VIEW CONTAINER -->
+    <div id="sim-view" class="hidden flex flex-col lg:flex-row gap-6">
+      
+      <!-- SIMULATION QUESTION PANEL -->
+      <div class="flex-1 flex flex-col gap-6">
+        
+        <!-- SIM HUD TOP BAR -->
+        <div class="bg-navy-800 rounded-2xl border border-navy-600 p-4 flex flex-wrap items-center justify-between gap-4">
+          <div class="flex items-center gap-3">
+            <span class="px-3 py-1 text-xs font-bold rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30">
+              🎯 Board Simulation (20Q)
+            </span>
+            <span class="text-xs text-slate-400 font-mono">
+              Exam Item <span id="sim-current-num" class="text-white font-bold">1</span> of <span id="sim-total-num" class="text-white font-bold">20</span>
+            </span>
+          </div>
+
+          <!-- Countdown Timer Display -->
+          <div class="flex items-center gap-3 bg-navy-900 px-4 py-1.5 rounded-xl border border-navy-600">
+            <span class="text-xs text-slate-400">⏱️ Time Remaining:</span>
+            <span id="sim-timer" class="font-mono font-bold text-lg text-cyan-400">30:00</span>
+          </div>
+
+          <!-- Flag Button -->
+          <button id="btn-sim-flag" onclick="app.toggleSimFlag()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-navy-700 border border-navy-600 text-xs font-semibold text-amber-400 hover:bg-navy-600 transition">
+            <span id="sim-flag-icon">🏳️</span>
+            <span id="sim-flag-text">Flag for Review</span>
+          </button>
+        </div>
+
+        <!-- SIM QUESTION CARD -->
+        <div class="bg-navy-800 rounded-2xl border border-navy-600 p-6 md:p-8 shadow-xl flex flex-col gap-6">
+          <div class="flex items-center justify-between border-b border-navy-600/60 pb-3">
+            <span id="sim-q-topic" class="px-2.5 py-0.5 rounded-md text-xs font-semibold bg-navy-700 text-cyan-400 border border-cyan-500/30">
+              [Vectors]
+            </span>
+            <span class="text-xs text-slate-400 font-mono">ECE Board Standard Weight: 5 Pts</span>
+          </div>
+
+          <div id="sim-q-text" class="text-base md:text-xl font-medium text-slate-100 leading-relaxed">
+            <!-- Populated by JS -->
+          </div>
+
+          <div id="sim-options-grid" class="grid grid-cols-1 md:grid-cols-2 gap-3 mt-2">
+            <!-- Option Buttons Populated by JS -->
+          </div>
+
+          <!-- Bottom Nav in Sim Mode -->
+          <div class="flex items-center justify-between border-t border-navy-600/60 pt-4 mt-2">
+            <button onclick="app.prevSimQuestion()" class="px-4 py-2 rounded-xl bg-navy-700 text-slate-300 hover:text-white border border-navy-600 text-xs font-semibold transition">
+              ← Previous
+            </button>
+            <div class="flex items-center gap-3">
+              <button onclick="app.nextSimQuestion()" class="px-5 py-2 rounded-xl bg-navy-700 text-cyan-400 hover:text-white border border-cyan-500/40 text-xs font-semibold transition">
+                Next →
+              </button>
+              <button onclick="app.confirmSubmitSim()" class="px-5 py-2 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 text-white font-bold text-xs hover:brightness-110 transition shadow">
+                Submit Exam
+              </button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- SIMULATION QUESTION NAVIGATOR SIDEBAR -->
+      <div class="w-full lg:w-72 bg-navy-800 rounded-2xl border border-navy-600 p-5 flex flex-col gap-4 h-fit">
+        <h3 class="font-bold text-sm text-slate-200 border-b border-navy-600 pb-2">
+          📋 Question Navigator
+        </h3>
+        
+        <div id="sim-nav-grid" class="grid grid-cols-5 gap-2">
+          <!-- 1-20 Navigator buttons populated by JS -->
+        </div>
+
+        <div class="flex flex-col gap-2 border-t border-navy-600 pt-3 text-xs text-slate-400">
+          <div class="flex items-center gap-2">
+            <span class="w-3 h-3 rounded bg-cyan-500"></span> Current Item
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="w-3 h-3 rounded bg-emerald-500/30 border border-emerald-500"></span> Answered
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="w-3 h-3 rounded bg-amber-500"></span> Flagged for Review
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="w-3 h-3 rounded bg-navy-900 border border-navy-600"></span> Unanswered
+          </div>
+        </div>
+
+        <button onclick="app.confirmSubmitSim()" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 text-white font-bold text-xs hover:brightness-110 transition shadow mt-2">
+          Submit Exam Now
+        </button>
+      </div>
+
+    </div>
+
+    <!-- SIMULATION RESULTS DASHBOARD VIEW -->
+    <div id="sim-results-view" class="hidden flex flex-col gap-6">
+      
+      <!-- Top Banner Summary -->
+      <div id="results-banner" class="bg-navy-800 rounded-2xl border border-navy-600 p-6 md:p-8 flex flex-col md:flex-row items-center justify-between gap-6 shadow-xl">
+        <div class="flex items-center gap-5">
+          <div id="results-score-badge" class="w-24 h-24 rounded-full flex flex-col items-center justify-center font-bold border-4 shadow-lg">
+            <span id="results-score-percent" class="text-2xl font-mono">0%</span>
+            <span id="results-score-fraction" class="text-[11px] text-slate-400">0/20</span>
+          </div>
+          <div class="flex flex-col gap-1">
+            <span id="results-status-pill" class="w-fit px-3 py-1 rounded-full text-xs font-extrabold uppercase tracking-wider">
+              Status
+            </span>
+            <h2 id="results-status-title" class="text-2xl font-bold text-white"></h2>
+            <p id="results-status-desc" class="text-xs text-slate-300 max-w-md"></p>
+          </div>
+        </div>
+
+        <!-- 70% Board Threshold Gauge Card -->
+        <div class="bg-navy-900/90 p-4 rounded-xl border border-navy-600 flex flex-col gap-2 w-full md:w-64">
+          <div class="flex justify-between items-center text-xs">
+            <span class="text-slate-400">ECE Board Threshold:</span>
+            <span class="font-bold text-amber-400">70.0% Passing</span>
+          </div>
+          <div class="w-full bg-navy-800 h-3 rounded-full overflow-hidden relative border border-navy-600">
+            <!-- Threshold Line -->
+            <div class="absolute left-[70%] top-0 bottom-0 w-0.5 bg-amber-400 z-10" title="70% Passing Line"></div>
+            <div id="results-gauge-fill" class="h-full transition-all duration-700"></div>
+          </div>
+          <p class="text-[11px] text-slate-400 text-center">Score needed: 14 out of 20 items</p>
+        </div>
+      </div>
+
+      <!-- Actions & Filter Bar for Review -->
+      <div class="flex flex-wrap items-center justify-between gap-4">
+        <h3 class="font-bold text-lg text-white">Detailed Question Breakdown & Dual Solutions</h3>
+        <div class="flex items-center gap-3">
+          <button id="btn-review-missed-only" onclick="app.filterResultsReview('missed')" class="px-4 py-2 rounded-xl bg-rose-500/20 border border-rose-500/40 text-rose-300 text-xs font-semibold hover:bg-rose-500/30 transition">
+            <span>❌ Practice Missed Questions Only</span>
+          </button>
+          <button onclick="app.switchMode('sim')" class="px-4 py-2 rounded-xl bg-cyan-500 text-navy-900 font-bold text-xs hover:brightness-110 transition">
+            🔄 Retake Simulation
+          </button>
+        </div>
+      </div>
+
+      <!-- Results Question List -->
+      <div id="results-questions-list" class="flex flex-col gap-6">
+        <!-- Generated by JS -->
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- FORMULA & CANON F-789SGA CHEAT SHEET MODAL -->
+  <div id="cheatsheet-modal" class="fixed inset-0 bg-navy-900/80 backdrop-blur z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-navy-800 border border-navy-600 w-full max-w-4xl rounded-2xl shadow-2xl flex flex-col max-h-[90vh] overflow-hidden animate-fadeIn">
+      
+      <!-- Modal Header -->
+      <div class="p-4 border-b border-navy-600 flex items-center justify-between bg-navy-900/50">
+        <div class="flex items-center gap-2">
+          <span class="text-xl">🧮</span>
+          <h2 class="font-bold text-base md:text-lg text-white">Electromagnetics & Canon F-789SGA Board Review Cheat Sheet</h2>
+        </div>
+        <button onclick="app.closeModal('cheatsheet-modal')" class="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-navy-700 transition">
+          ✕
+        </button>
+      </div>
+
+      <!-- Modal Scrollable Content -->
+      <div class="p-6 overflow-y-auto space-y-6 text-xs md:text-sm">
+        
+        <!-- Canon F-789SGA Vector Mode Quick Reference -->
+        <div class="bg-navy-900/90 rounded-xl p-4 border border-amber-500/30">
+          <h3 class="font-bold text-amber-400 border-b border-navy-700 pb-2 mb-3 flex items-center gap-2">
+            <span>⚡ Canon F-789SGA Vector Mode Setup & Commands</span>
+          </h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <p class="text-slate-300 font-semibold mb-1">Enter Vector Mode & Store Vectors:</p>
+              <ul class="space-y-1.5 text-slate-300 font-mono text-[11px]">
+                <li>• <kbd class="calc-key key-purple">MODE</kbd> <kbd class="calc-key key-dark">8 (VECTOR)</kbd></li>
+                <li>• <kbd class="calc-key key-cyan">Apps</kbd> <kbd class="calc-key key-dark">1 (VctA)</kbd> → <kbd class="calc-key key-dark">1 (3D)</kbd> or <kbd class="calc-key key-dark">2 (2D)</kbd></li>
+                <li>• Enter components, then press <kbd class="calc-key key-dark">AC</kbd></li>
+                <li>• To edit/store VctB/C: <kbd class="calc-key key-cyan">Apps</kbd> <kbd class="calc-key key-dark">2 (Data)</kbd> → select VctB or VctC</li>
+              </ul>
+            </div>
+            <div>
+              <p class="text-slate-300 font-semibold mb-1">Key Vector Operations:</p>
+              <ul class="space-y-1.5 text-slate-300 font-mono text-[11px]">
+                <li>• <b>Dot Product:</b> <kbd class="calc-key key-cyan">Apps</kbd> <kbd class="calc-key key-dark">3 (VctA)</kbd> <kbd class="calc-key key-cyan">Apps</kbd> <kbd class="calc-key key-dark">8 (Dot)</kbd> <kbd class="calc-key key-cyan">Apps</kbd> <kbd class="calc-key key-dark">4 (VctB)</kbd></li>
+                <li>• <b>Cross Product:</b> <kbd class="calc-key key-cyan">Apps</kbd> <kbd class="calc-key key-dark">3 (VctA)</kbd> <kbd class="calc-key key-dark">×</kbd> <kbd class="calc-key key-cyan">Apps</kbd> <kbd class="calc-key key-dark">4 (VctB)</kbd></li>
+                <li>• <b>Vector Magnitude |V|:</b> <kbd class="calc-key key-gold">SHIFT</kbd> <kbd class="calc-key key-dark">hyp (Abs)</kbd> <kbd class="calc-key key-cyan">Apps</kbd> <kbd class="calc-key key-dark">3 (VctA)</kbd></li>
+                <li>• <b>Unit Vector û:</b> <kbd class="calc-key key-cyan">Apps</kbd> <kbd class="calc-key key-dark">3</kbd> ÷ <kbd class="calc-key key-gold">SHIFT</kbd> <kbd class="calc-key key-dark">hyp</kbd> <kbd class="calc-key key-cyan">Apps</kbd> <kbd class="calc-key key-dark">3</kbd></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Coordinates Conversion Shortcuts -->
+        <div class="bg-navy-900/90 rounded-xl p-4 border border-cyan-500/30">
+          <h3 class="font-bold text-cyan-400 border-b border-navy-700 pb-2 mb-3">
+            🌐 Coordinate Conversions & Canon Pol() / Rec() Traps
+          </h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+            <div>
+              <h4 class="font-semibold text-slate-200">Cartesian (x,y,z) ↔ Cylindrical (ρ,φ,z)</h4>
+              <p class="text-slate-300 mt-1">z remains identical. Convert (x,y) via calculator:</p>
+              <p class="font-mono text-cyan-300 text-[11px] mt-1">• <kbd class="calc-key key-gold">SHIFT</kbd> <kbd class="calc-key key-dark">+ (Pol)</kbd> <kbd class="calc-key key-dark">x, y</kbd> → <span class="text-amber-300">r = ρ, θ = φ</span> (Auto Quadrants!)</p>
+              <p class="font-mono text-cyan-300 text-[11px] mt-1">• <kbd class="calc-key key-gold">SHIFT</kbd> <kbd class="calc-key key-dark">- (Rec)</kbd> <kbd class="calc-key key-dark">ρ, φ</kbd> → <span class="text-amber-300">X = x, Y = y</span></p>
+            </div>
+            <div>
+              <h4 class="font-semibold text-slate-200">Spherical (r,θ,φ) ↔ Cylindrical (ρ,φ,z)</h4>
+              <p class="text-slate-300 mt-1">φ stays unchanged. Convert (r,θ) via Rec:</p>
+              <p class="font-mono text-cyan-300 text-[11px] mt-1">• <kbd class="calc-key key-gold">SHIFT</kbd> <kbd class="calc-key key-dark">- (Rec)</kbd> <kbd class="calc-key key-dark">r, θ</kbd> → <span class="text-amber-300">X = z</span> and <span class="text-amber-300">Y = ρ</span></p>
+              <p class="text-rose-400 font-bold mt-1 text-[11px]">⚠️ BOARD TRAP: Calculator outputs X first (which is z) and Y second (which is ρ). Write Cylindrical as (ρ, φ, z) = (Y, φ, X)!</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Del Operators Summary -->
+        <div class="bg-navy-900/90 rounded-xl p-4 border border-navy-600">
+          <h3 class="font-bold text-emerald-400 border-b border-navy-700 pb-2 mb-3">
+            ∇ Del Operators Core Rules
+          </h3>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+            <div>
+              <h4 class="font-bold text-slate-200">Gradient ∇f</h4>
+              <p class="text-slate-400 text-[11px]">Scalar → Vector</p>
+              <p class="font-mono text-slate-300 mt-1">∇f = (∂f/∂x)i + (∂f/∂y)j + (∂f/∂z)k</p>
+              <p class="text-slate-400 text-[11px] mt-1">Directional Derivative: D_u f = ∇f · û</p>
+            </div>
+            <div>
+              <h4 class="font-bold text-slate-200">Divergence ∇ · F</h4>
+              <p class="text-slate-400 text-[11px]">Vector → Scalar</p>
+              <p class="font-mono text-slate-300 mt-1">∇·F = ∂Fx/∂x + ∂Fy/∂y + ∂Fz/∂z</p>
+              <p class="text-amber-300 font-semibold text-[11px] mt-1">∇ · F = 0 → SOLENOIDAL (Divergence-free)</p>
+            </div>
+            <div>
+              <h4 class="font-bold text-slate-200">Curl ∇ × F</h4>
+              <p class="text-slate-400 text-[11px]">Vector → Vector</p>
+              <p class="font-mono text-slate-300 mt-1">Determinant of [i j k; ∂/∂x ∂/∂y ∂/∂z; Fx Fy Fz]</p>
+              <p class="text-amber-300 font-semibold text-[11px] mt-1">∇ × F = 0 → IRROTATIONAL</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- The 3 Fundamental Integral Theorems -->
+        <div class="bg-navy-900/90 rounded-xl p-4 border border-navy-600">
+          <h3 class="font-bold text-slate-200 border-b border-navy-700 pb-2 mb-3">
+            📜 The 3 Integral Theorems of Vector Calculus
+          </h3>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+            <div class="p-2.5 rounded-lg bg-navy-800 border border-navy-700">
+              <h4 class="font-bold text-cyan-400">Stokes' Theorem</h4>
+              <p class="text-slate-300 text-[11px] mt-1">Connects <b>Line Integral & Surface Integral</b>:</p>
+              <p class="font-mono text-[11px] text-slate-400 mt-1">∮_C F · dr = ∬_S (∇ × F) · dS</p>
+            </div>
+            <div class="p-2.5 rounded-lg bg-navy-800 border border-navy-700">
+              <h4 class="font-bold text-cyan-400">Green's Theorem</h4>
+              <p class="text-slate-300 text-[11px] mt-1">2D Planar case of Stokes':</p>
+              <p class="font-mono text-[11px] text-slate-400 mt-1">∮_C (P dx + Q dy) = ∬_D (∂Q/∂x - ∂P/∂y) dA</p>
+            </div>
+            <div class="p-2.5 rounded-lg bg-navy-800 border border-navy-700">
+              <h4 class="font-bold text-emerald-400">Gauss Divergence Theorem</h4>
+              <p class="text-slate-300 text-[11px] mt-1">Connects <b>Surface Integral & Volume Integral</b>:</p>
+              <p class="font-mono text-[11px] text-slate-400 mt-1">∬_S F · dS = ∭_V (∇ · F) dV</p>
+            </div>
+          </div>
+          <p class="text-rose-400 font-semibold text-xs mt-3">⚠️ Board Exam Classic Distractor: <b>Kennedy's theorem</b> is for kinematics of machinery (instantaneous centers), NOT vector calculus!</p>
+        </div>
+
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="p-4 border-t border-navy-600 bg-navy-900/50 flex justify-end">
+        <button onclick="app.closeModal('cheatsheet-modal')" class="px-5 py-2 rounded-xl bg-cyan-500 text-navy-900 font-bold text-xs hover:brightness-110 transition">
+          Close Reference Sheet
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- COMPLETE VERIFIED QUESTION BANK DATA & APP SCRIPT -->
+  <script>
+    // Audio Synthesizer via Web Audio API (Offline reliable sound effects)
+    class SoundFX {
+      constructor() {
+        this.ctx = null;
+        this.enabled = true;
+      }
+      init() {
+        if (!this.ctx) {
+          const AudioContext = window.AudioContext || window.webkitAudioContext;
+          if (AudioContext) this.ctx = new AudioContext();
+        }
+        if (this.ctx && this.ctx.state === 'suspended') {
+          this.ctx.resume();
+        }
+      }
+      playCorrect() {
+        if (!this.enabled) return;
+        this.init();
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+        const osc1 = this.ctx.createOscillator();
+        const osc2 = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+
+        osc1.type = 'sine';
+        osc2.type = 'triangle';
+
+        // Ascending chord (C5 -> E5 -> G5)
+        osc1.frequency.setValueAtTime(523.25, now);
+        osc1.frequency.exponentialRampToValueAtTime(659.25, now + 0.1);
+        osc1.frequency.exponentialRampToValueAtTime(783.99, now + 0.2);
+
+        osc2.frequency.setValueAtTime(261.63, now);
+        osc2.frequency.exponentialRampToValueAtTime(329.63, now + 0.1);
+
+        gain.gain.setValueAtTime(0.2, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+
+        osc1.connect(gain);
+        osc2.connect(gain);
+        gain.connect(this.ctx.destination);
+
+        osc1.start(now);
+        osc2.start(now);
+        osc1.stop(now + 0.35);
+        osc2.stop(now + 0.35);
+      }
+      playStreak() {
+        if (!this.enabled) return;
+        this.init();
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+        const notes = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
+        notes.forEach((freq, idx) => {
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(freq, now + idx * 0.07);
+          gain.gain.setValueAtTime(0.25, now + idx * 0.07);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.07 + 0.2);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(now + idx * 0.07);
+          osc.stop(now + idx * 0.07 + 0.2);
+        });
+      }
+      playWrong() {
+        if (!this.enabled) return;
+        this.init();
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(160, now);
+        osc.frequency.exponentialRampToValueAtTime(90, now + 0.25);
+
+        gain.gain.setValueAtTime(0.2, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
+
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+
+        osc.start(now);
+        osc.stop(now + 0.25);
+      }
+    }
+
+    // Confetti Particle System
+    class Confetti {
+      constructor() {
+        this.canvas = document.getElementById('confetti-canvas');
+        this.ctx = this.canvas.getContext('2d');
+        this.particles = [];
+        this.animId = null;
+        this.resize();
+        window.addEventListener('resize', () => this.resize());
+      }
+      resize() {
+        this.canvas.width = window.innerWidth;
+        this.canvas.height = window.innerHeight;
+      }
+      burst() {
+        this.particles = [];
+        const colors = ['#38bdf8', '#10b981', '#f59e0b', '#fb7185', '#a855f7'];
+        for (let i = 0; i < 60; i++) {
+          this.particles.push({
+            x: window.innerWidth / 2,
+            y: window.innerHeight / 3,
+            vx: (Math.random() - 0.5) * 16,
+            vy: (Math.random() - 0.7) * 16,
+            size: Math.random() * 8 + 4,
+            color: colors[Math.floor(Math.random() * colors.length)],
+            rotation: Math.random() * Math.PI * 2,
+            vRot: (Math.random() - 0.5) * 0.2,
+            life: 1.0
+          });
+        }
+        if (!this.animId) this.animate();
+      }
+      animate() {
+        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        let alive = false;
+        this.particles.forEach(p => {
+          if (p.life > 0) {
+            alive = true;
+            p.x += p.vx;
+            p.y += p.vy;
+            p.vy += 0.4; // gravity
+            p.rotation += p.vRot;
+            p.life -= 0.02;
+
+            this.ctx.save();
+            this.ctx.translate(p.x, p.y);
+            this.ctx.rotate(p.rotation);
+            this.ctx.globalAlpha = Math.max(0, p.life);
+            this.ctx.fillStyle = p.color;
+            this.ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
+            this.ctx.restore();
+          }
+        });
+        if (alive) {
+          this.animId = requestAnimationFrame(() => this.animate());
+        } else {
+          this.animId = null;
+          this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        }
+      }
+    }
+
+    // ALL 40 VERIFIED QUESTIONS DATA BANK
+    const QUESTION_BANK = [
+      // ----------------- PART A: 28 REVIEWER ITEMS (1 to 28) -----------------
+      {
+        id: 1,
+        source: 'reviewer',
+        topic: 'Vectors',
+        q: "Which of the following is a vector quantity?",
+        choices: [
+          "Relative permeability",
+          "Magnetic field intensity",
+          "Magnetic flux",
+          "Magnetic potential"
+        ],
+        answer: 1, // B
+        manual: "<b>Magnetic field intensity (<span class='math-font'>H</span>)</b> has both magnitude and direction (A/m), making it a vector quantity.<br><br>• Relative permeability (<span class='math-font'>μ<sub>r</sub></span>) is a dimensionless scalar.<br>• Magnetic flux (<span class='math-font'>Φ</span>) is a scalar (Webers).<br>• Magnetic potential is a scalar quantity.",
+        calc: "<b>Conceptual Board Key:</b> No calculator required.<br><br><b>Quick Memory Rule:</b> Terms ending in <i>'Field Intensity'</i> (<span class='math-font'>E</span> or <span class='math-font'>H</span>) and <i>'Flux Density'</i> (<span class='math-font'>D</span> or <span class='math-font'>B</span>) are ALWAYS vectors. Terms with <i>'Flux'</i> alone or <i>'Potential'</i> alone are scalars!"
+      },
+      {
+        id: 2,
+        source: 'reviewer',
+        topic: 'Vectors',
+        q: "For the vector <span class='math-font'>A</span> with initial point P(4, 0, 2) and terminal point Q(6, -1, 2), the value of |<span class='math-font'>A</span>| will be:",
+        choices: [
+          "√3",
+          "√7",
+          "√5",
+          "√2"
+        ],
+        answer: 2, // C
+        manual: "Vector <span class='math-font'>A</span> = Terminal Point Q − Initial Point P:<br><span class='math-font'>A</span> = (6−4)<span class='vec-symbol'>î</span> + (−1−0)<span class='vec-symbol'>ĵ</span> + (2−2)<span class='vec-symbol'>k̂</span> = 2<span class='vec-symbol'>î</span> − <span class='vec-symbol'>ĵ</span> + 0<span class='vec-symbol'>k̂</span>.<br><br>Magnitude: |<span class='math-font'>A</span>| = <span class='radicand'>√(2² + (−1)² + 0²)</span> = <span class='radicand'>√(4 + 1)</span> = <b>√5</b> ≈ 2.2361.",
+        calc: "<b>Canon F-789SGA Vector Mode:</b><br>1. <kbd class='calc-key key-purple'>MODE</kbd> <kbd class='calc-key key-dark'>8 (VECTOR)</kbd><br>2. Store P: <kbd class='calc-key key-cyan'>Apps</kbd> <kbd class='calc-key key-dark'>1 (VctA)</kbd> <kbd class='calc-key key-dark'>1 (3D)</kbd> → [4, 0, 2] → <kbd class='calc-key key-dark'>AC</kbd><br>3. Store Q: <kbd class='calc-key key-cyan'>Apps</kbd> <kbd class='calc-key key-dark'>2 (Data)</kbd> <kbd class='calc-key key-dark'>2 (VctB)</kbd> <kbd class='calc-key key-dark'>1 (3D)</kbd> → [6, -1, 2] → <kbd class='calc-key key-dark'>AC</kbd><br>4. Compute |Q - P|: <kbd class='calc-key key-gold'>SHIFT</kbd> <kbd class='calc-key key-dark'>hyp (Abs)</kbd> ( <kbd class='calc-key key-cyan'>Apps</kbd> <kbd class='calc-key key-dark'>4 (VctB)</kbd> − <kbd class='calc-key key-cyan'>Apps</kbd> <kbd class='calc-key key-dark'>3 (VctA)</kbd> ) <kbd class='calc-key key-dark'>=</kbd> → <b>2.236067977</b>.<br>5. Press <kbd class='calc-key key-dark'>Ans</kbd> <kbd class='calc-key key-dark'>x²</kbd> <kbd class='calc-key key-dark'>=</kbd> → 5, confirming <b>√5</b>."
+      },
+      {
+        id: 3,
+        source: 'reviewer',
+        topic: 'Vectors',
+        q: "The magnitude of the vector 6<span class='vec-symbol'>î</span> + 2<span class='vec-symbol'>ĵ</span> + 3<span class='vec-symbol'>k̂</span> is equal to:",
+        choices: [
+          "5",
+          "1",
+          "7",
+          "12"
+        ],
+        answer: 2, // C
+        manual: "|<span class='math-font'>V</span>| = <span class='radicand'>√(6² + 2² + 3²)</span> = <span class='radicand'>√(36 + 4 + 9)</span> = <span class='radicand'>√49</span> = <b>7</b>.<br><br><i>(Bonus check: Unit vector = (6/7)<span class='vec-symbol'>î</span> + (2/7)<span class='vec-symbol'>ĵ</span> + (3/7)<span class='vec-symbol'>k̂</span>)</i>.",
+        calc: "<b>Canon F-789SGA Vector Mode:</b><br>1. <kbd class='calc-key key-purple'>MODE</kbd> <kbd class='calc-key key-dark'>8</kbd> <kbd class='calc-key key-dark'>1 (VctA)</kbd> <kbd class='calc-key key-dark'>1 (3D)</kbd> → enter [6, 2, 3] → <kbd class='calc-key key-dark'>AC</kbd><br>2. Press <kbd class='calc-key key-gold'>SHIFT</kbd> <kbd class='calc-key key-dark'>hyp (Abs)</kbd> <kbd class='calc-key key-cyan'>Apps</kbd> <kbd class='calc-key key-dark'>3 (VctA)</kbd> <kbd class='calc-key key-dark'>=</kbd> → <b>7</b>."
+      },
+      {
+        id: 4,
+        source: 'reviewer',
+        topic: 'Vectors',
+        q: "If <span class='math-font'>a</span> = <span class='vec-symbol'>î</span> + <span class='vec-symbol'>ĵ</span> + <span class='vec-symbol'>k̂</span>, <span class='math-font'>b</span> = 2<span class='vec-symbol'>î</span> − <span class='vec-symbol'>ĵ</span> + 3<span class='vec-symbol'>k̂</span>, and <span class='math-font'>c</span> = <span class='vec-symbol'>î</span> − 2<span class='vec-symbol'>ĵ</span> + <span class='vec-symbol'>k̂</span>, find a unit vector parallel to 2<span class='math-font'>a</span> − <span class='math-font'>b</span> + 3<span class='math-font'>c</span>.",
+        choices: [
+          "(9/√22)î − (3/√22)ĵ + (1/√22)k̂",
+          "(2/√22)î − (3/√22)ĵ + (2/√22)k̂",
+          "(3/√22)î − (3/√22)ĵ + (3/√22)k̂",
+          "(3/√22)î − (3/√22)ĵ + (2/√22)k̂"
+        ],
+        answer: 3, // D
+        manual: "1. 2<span class='math-font'>a</span> = 2<span class='vec-symbol'>î</span> + 2<span class='vec-symbol'>ĵ</span> + 2<span class='vec-symbol'>k̂</span><br>2. −<span class='math-font'>b</span> = −2<span class='vec-symbol'>î</span> + <span class='vec-symbol'>ĵ</span> − 3<span class='vec-symbol'>k̂</span><br>3. 3<span class='math-font'>c</span> = 3<span class='vec-symbol'>î</span> − 6<span class='vec-symbol'>ĵ</span> + 3<span class='vec-symbol'>k̂</span><br><br>Sum <span class='math-font'>V</span> = (2−2+3)<span class='vec-symbol'>î</span> + (2+1−6)<span class='vec-symbol'>ĵ</span> + (2−3+3)<span class='vec-symbol'>k̂</span> = 3<span class='vec-symbol'>î</span> − 3<span class='vec-symbol'>ĵ</span> + 2<span class='vec-symbol'>k̂</span>.<br>Magnitude |<span class='math-font'>V</span>| = <span class='radicand'>√(3² + (−3)² + 2²)</span> = <span class='radicand'>√(9+9+4)</span> = √22.<br>Unit vector = <span class='frac'><span class='num'>V</span><span class='den'>|V|</span></span> = <b>(3/√22)<span class='vec-symbol'>î</span> − (3/√22)<span class='vec-symbol'>ĵ</span> + (2/√22)<span class='vec-symbol'>k̂</span></b>.",
+        calc: "<b>Canon F-789SGA:</b><br>In <kbd class='calc-key key-purple'>MODE 8</kbd>, store VctA=[1,1,1], VctB=[2,-1,3], VctC=[1,-2,1] via <kbd class='calc-key key-cyan'>Apps</kbd><kbd class='calc-key key-dark'>2</kbd>.<br>Compute: 2<kbd class='calc-key key-cyan'>Apps</kbd><kbd class='calc-key key-dark'>3</kbd> − <kbd class='calc-key key-cyan'>Apps</kbd><kbd class='calc-key key-dark'>4</kbd> + 3<kbd class='calc-key key-cyan'>Apps</kbd><kbd class='calc-key key-dark'>5 (VctC)</kbd> <kbd class='calc-key key-dark'>=</kbd> → <b>[3, -3, 2]</b>.<br>Divide by Abs: <kbd class='calc-key key-cyan'>Apps</kbd><kbd class='calc-key key-dark'>7 (VctAns)</kbd> ÷ <kbd class='calc-key key-gold'>SHIFT</kbd><kbd class='calc-key key-dark'>hyp</kbd><kbd class='calc-key key-cyan'>Apps</kbd><kbd class='calc-key key-dark'>7</kbd> <kbd class='calc-key key-dark'>=</kbd> → <b>[0.6396, -0.6396, 0.4264]</b>.<br>Compare 3/√22 ≈ 0.6396 and 2/√22 ≈ 0.4264 → Option D."
+      },
+      {
+        id: 5,
+        source: 'reviewer',
+        topic: 'Vectors',
+        q: "Find the value of <span class='math-font'>x</span> if vector <span class='math-font'>A</span> = <span class='math-font'>x</span><span class='vec-symbol'>î</span> + 0.5<span class='vec-symbol'>ĵ</span> − 0.2<span class='vec-symbol'>k̂</span> is a unit vector.",
+        choices: [
+          "√0.29",
+          "√0.81",
+          "√0.35",
+          "√0.71"
+        ],
+        answer: 3, // D
+        manual: "A unit vector has magnitude equal to 1:<br>|<span class='math-font'>A</span>| = <span class='radicand'>√(x² + 0.5² + (−0.2)²)</span> = 1<br><span class='math-font'>x</span>² + 0.25 + 0.04 = 1<br><span class='math-font'>x</span>² = 1 − 0.29 = 0.71 → <b>x = √0.71</b>.",
+        calc: "<b>Canon F-789SGA COMP Mode [MODE 1]:</b><br>Type: <kbd class='calc-key key-dark'>1</kbd> <kbd class='calc-key key-gold'>ALPHA</kbd><kbd class='calc-key key-dark'>CALC (=)</kbd> <kbd class='calc-key key-dark'>√</kbd>( <kbd class='calc-key key-gold'>ALPHA</kbd><kbd class='calc-key key-dark'>) (X)</kbd>² + 0.5² + (-0.2)² )<br>Press <kbd class='calc-key key-gold'>SHIFT</kbd><kbd class='calc-key key-dark'>CALC (SOLVE)</kbd> <kbd class='calc-key key-dark'>=</kbd> → X = <b>0.8426149773</b>.<br>Square the result: <kbd class='calc-key key-dark'>AC</kbd> <kbd class='calc-key key-dark'>Ans</kbd> <kbd class='calc-key key-dark'>x²</kbd> <kbd class='calc-key key-dark'>=</kbd> → 0.71 → <b>√0.71</b>."
+      },
+      {
+        id: 6,
+        source: 'reviewer',
+        topic: 'Vectors',
+        q: "The angle between two vectors <span class='math-font'>x</span>₁ = [2, 6, 14] and <span class='math-font'>x</span>₂ = [-12, 8, 16] in <b>radian</b> is ____.",
+        choices: [
+          "0.34",
+          "0.65",
+          "0.29",
+          "0.72"
+        ],
+        answer: 3, // D
+        manual: "Dot Product: <span class='math-font'>x</span>₁·<span class='math-font'>x</span>₂ = (2)(-12) + (6)(8) + (14)(16) = -24 + 48 + 224 = 248.<br>|<span class='math-font'>x</span>₁| = <span class='radicand'>√(2²+6²+14²)</span> = √236.<br>|<span class='math-font'>x</span>₂| = <span class='radicand'>√((-12)²+8²+16²)</span> = √464.<br>cos θ = <span class='frac'><span class='num'>248</span><span class='den'>√(236) · √(464)</span></span> = <span class='frac'><span class='num'>248</span><span class='den'>330.9139</span></span> = 0.74944.<br>θ = cos⁻¹(0.74944) = <b>0.7236 rad ≈ 0.72</b>.",
+        calc: "<b>⚠️ BOARD TRAP: Calculator MUST be in RADIAN MODE!</b><br>1. Press <kbd class='calc-key key-gold'>SHIFT</kbd><kbd class='calc-key key-purple'>MODE</kbd> <kbd class='calc-key key-dark'>4 (Rad)</kbd><br>2. In <kbd class='calc-key key-purple'>MODE 8</kbd>, store VctA=[2,6,14] and VctB=[-12,8,16].<br>3. Compute: ( <kbd class='calc-key key-cyan'>Apps</kbd><kbd class='calc-key key-dark'>3</kbd> <kbd class='calc-key key-cyan'>Apps</kbd><kbd class='calc-key key-dark'>8 (Dot)</kbd> <kbd class='calc-key key-cyan'>Apps</kbd><kbd class='calc-key key-dark'>4</kbd> ) ÷ ( Abs(VctA) × Abs(VctB) ) <kbd class='calc-key key-dark'>=</kbd> → 0.74944.<br>4. Press <kbd class='calc-key key-gold'>SHIFT</kbd><kbd class='calc-key key-dark'>cos</kbd> <kbd class='calc-key key-dark'>Ans</kbd> <kbd class='calc-key key-dark'>=</kbd> → <b>0.7236 rad</b>."
+      },
+      {
+        id: 7,
+        source: 'reviewer',
+        topic: 'Vectors',
+        q: "The angle θ<sub>AB</sub> between the vectors <span class='math-font'>A</span> = 3a<sub>x</sub> + 4a<sub>y</sub> + a<sub>z</sub> and <span class='math-font'>B</span> = 2a<sub>y</sub> − 5a<sub>z</sub> is nearly:",
+        choices: [
+          "83.7 deg",
+          "73.7 deg",
+          "63.7 deg",
+          "53.7 deg"
+        ],
+        answer: 0, // A
+        manual: "Note that vector <span class='math-font'>B</span> has 0 for a<sub>x</sub>: <span class='math-font'>A</span> = [3, 4, 1], <span class='math-font'>B</span> = [0, 2, -5].<br><span class='math-font'>A</span> · <span class='math-font'>B</span> = (3)(0) + (4)(2) + (1)(-5) = 3.<br>|<span class='math-font'>A</span>| = <span class='radicand'>√(9+16+1)</span> = √26 ≈ 5.099.<br>|<span class='math-font'>B</span>| = <span class='radicand'>√(0+4+25)</span> = √29 ≈ 5.385.<br>cos θ = <span class='frac'><span class='num'>3</span><span class='den'>√(26×29)</span></span> = <span class='frac'><span class='num'>3</span><span class='den'>27.459</span></span> = 0.10925.<br>θ = cos⁻¹(0.10925) = <b>83.73° ≈ 83.7 deg</b>.",
+        calc: "<b>⚠️ TRAP: Ensure DEGREE MODE and 0 for B's x-component!</b><br>1. <kbd class='calc-key key-gold'>SHIFT</kbd><kbd class='calc-key key-purple'>MODE</kbd> <kbd class='calc-key key-dark'>3 (Deg)</kbd><br>2. In <kbd class='calc-key key-purple'>MODE 8</kbd>, VctA=[3, 4, 1], VctB=[0, 2, -5].<br>3. Compute: <kbd class='calc-key key-gold'>SHIFT</kbd><kbd class='calc-key key-dark'>cos</kbd>( (VctA · VctB) ÷ (Abs(VctA)Abs(VctB)) ) <kbd class='calc-key key-dark'>=</kbd> → <b>83.727°</b>."
+      },
+      {
+        id: 8,
+        source: 'reviewer',
+        topic: 'Vectors',
+        q: "The scalar product of 5<span class='vec-symbol'>î</span> + <span class='vec-symbol'>ĵ</span> − 3<span class='vec-symbol'>k̂</span> and 3<span class='vec-symbol'>î</span> − 4<span class='vec-symbol'>ĵ</span> + 7<span class='vec-symbol'>k̂</span> is:",
+        choices: [
+          "15",
+          "-15",
+          "10",
+          "-10"
+        ],
+        answer: 3, // D
+        manual: "Scalar (Dot) Product: <span class='math-font'>A</span> · <span class='math-font'>B</span> = A<sub>x</sub>B<sub>x</sub> + A<sub>y</sub>B<sub>y</sub> + A<sub>z</sub>B<sub>z</sub><br><span class='math-font'>A</span> · <span class='math-font'>B</span> = (5)(3) + (1)(-4) + (-3)(7) = 15 − 4 − 21 = <b>-10</b>.",
+        calc: "<b>Canon F-789SGA:</b><br><kbd class='calc-key key-purple'>MODE 8</kbd> → VctA=[5, 1, -3], VctB=[3, -4, 7].<br>Press: <kbd class='calc-key key-cyan'>Apps</kbd><kbd class='calc-key key-dark'>3 (VctA)</kbd> <kbd class='calc-key key-cyan'>Apps</kbd><kbd class='calc-key key-dark'>8 (Dot)</kbd> <kbd class='calc-key key-cyan'>Apps</kbd><kbd class='calc-key key-dark'>4 (VctB)</kbd> <kbd class='calc-key key-dark'>=</kbd> → <b>-10</b>."
+      },
+      {
+        id: 9,
+        source: 'reviewer',
+        topic: 'Vectors',
+        q: "If |<span class='math-font'>a</span> × <span class='math-font'>b</span>| = 4 and |<span class='math-font'>a</span> · <span class='math-font'>b</span>| = 2, then |<span class='math-font'>a</span>|²|<span class='math-font'>b</span>|² is equal to:",
+        choices: [
+          "4",
+          "6",
+          "20",
+          "2"
+        ],
+        answer: 2, // C
+        manual: "<b>Engr. Umengan's Square & Add Identity Shortcut:</b><br>|<span class='math-font'>a</span> × <span class='math-font'>b</span>|² + |<span class='math-font'>a</span> · <span class='math-font'>b</span>|² = (|<span class='math-font'>a</span>||<span class='math-font'>b</span>| sin θ)² + (|<span class='math-font'>a</span>||<span class='math-font'>b</span>| cos θ)²<br>= |<span class='math-font'>a</span>|²|<span class='math-font'>b</span>|² (sin² θ + cos² θ) = |<span class='math-font'>a</span>|²|<span class='math-font'>b</span>|²(1).<br><br>Therefore: |<span class='math-font'>a</span>|²|<span class='math-font'>b</span>|² = 4² + 2² = 16 + 4 = <b>20</b>.",
+        calc: "<b>Fast Calc Trick:</b> In <kbd class='calc-key key-purple'>MODE 1</kbd>, compute: `4² + 2² = 20`.<br><br><i>(Check via angle: tan θ = 4/2 = 2 → θ = tan⁻¹(2) = 63.435°. Then (|a||b|)² = (4 / sin 63.435°)² = 20)</i>."
+      },
+      {
+        id: 10,
+        source: 'reviewer',
+        topic: 'Vectors',
+        q: "Which of the following options is equal to the cross product of <span class='math-font'>A</span> × <span class='math-font'>B</span>?",
+        choices: [
+          "-B × A",
+          "-B × -A",
+          "B × A",
+          "-(B × A)"
+        ],
+        answer: 3, // D
+        manual: "Vector cross product is <b>anti-commutative</b>. Reversing the order of vectors negates the resulting vector direction:<br><span class='math-font'>A</span> × <span class='math-font'>B</span> = <b>-(<span class='math-font'>B</span> × <span class='math-font'>A</span>)</b>.<br><br><i>(Note: Dot product IS commutative: A · B = B · A)</i>.",
+        calc: "<b>Conceptual Rule:</b> Always choose the explicit anti-commutative parenthesized notation <b>-(B × A)</b> on ECE Board Exams!"
+      },
+      {
+        id: 11,
+        source: 'reviewer',
+        topic: 'Vectors',
+        q: "A unit vector perpendicular to both the vectors <span class='vec-symbol'>î</span> − 2<span class='vec-symbol'>ĵ</span> + 3<span class='vec-symbol'>k̂</span> and <span class='vec-symbol'>î</span> + 2<span class='vec-symbol'>ĵ</span> − <span class='vec-symbol'>k̂</span> is:",
+        choices: [
+          "(-î + ĵ + k̂)",
+          "(-î + ĵ + k̂)/√3",
+          "(-î + ĵ + k̂)/√2",
+          "(î + ĵ + k̂)/√3"
+        ],
+        answer: 1, // B
+        manual: "1. Cross product yields a perpendicular vector:<br><span class='math-font'>a</span> × <span class='math-font'>b</span> = det([<span class='vec-symbol'>î</span>, <span class='vec-symbol'>ĵ</span>, <span class='vec-symbol'>k̂</span>; 1, -2, 3; 1, 2, -1])<br>= ((-2)(-1) − (3)(2))<span class='vec-symbol'>î</span> − ((1)(-1) − (3)(1))<span class='vec-symbol'>ĵ</span> + ((1)(2) − (-2)(1))<span class='vec-symbol'>k̂</span> = -4<span class='vec-symbol'>î</span> + 4<span class='vec-symbol'>ĵ</span> + 4<span class='vec-symbol'>k̂</span>.<br>2. Magnitude: |<span class='math-font'>a</span> × <span class='math-font'>b</span>| = <span class='radicand'>√((-4)² + 4² + 4²)</span> = √48 = 4√3.<br>3. Unit Vector: <span class='frac'><span class='num'>-4î + 4ĵ + 4k̂</span><span class='den'>4√3</span></span> = <b>(-<span class='vec-symbol'>î</span> + <span class='vec-symbol'>ĵ</span> + <span class='vec-symbol'>k̂</span>)/√3</b>.",
+        calc: "<b>Canon F-789SGA:</b><br><kbd class='calc-key key-purple'>MODE 8</kbd> → VctA=[1, -2, 3], VctB=[1, 2, -1].<br>Cross: <kbd class='calc-key key-cyan'>Apps</kbd><kbd class='calc-key key-dark'>3</kbd> <kbd class='calc-key key-dark'>×</kbd> <kbd class='calc-key key-cyan'>Apps</kbd><kbd class='calc-key key-dark'>4</kbd> <kbd class='calc-key key-dark'>=</kbd> → <b>[-4, 4, 4]</b>.<br>Normalize: <kbd class='calc-key key-cyan'>Apps</kbd><kbd class='calc-key key-dark'>7</kbd> ÷ Abs(<kbd class='calc-key key-cyan'>Apps</kbd><kbd class='calc-key key-dark'>7</kbd>) <kbd class='calc-key key-dark'>=</kbd> → <b>[-0.57735, 0.57735, 0.57735]</b>.<br>Since 1/√3 ≈ 0.57735, the unit vector is <b>(-î + ĵ + k̂)/√3</b>."
+      },
+      {
+        id: 12,
+        source: 'reviewer',
+        topic: 'Coordinates',
+        q: "Convert the Cartesian coordinates (2, -5, 7) to Cylindrical coordinates.",
+        choices: [
+          "(6.385, -68.20 deg, 7)",
+          "(5.385, 68.20 deg, 7)",
+          "(6.385, 68.20 deg, 7)",
+          "(5.385, -68.20 deg, 7)"
+        ],
+        answer: 3, // D
+        manual: "1. ρ = <span class='radicand'>√(x² + y²)</span> = <span class='radicand'>√(2² + (-5)²)</span> = √29 = <b>5.385</b>.<br>2. φ = tan⁻¹(y/x) = tan⁻¹(-5/2) = <b>-68.20°</b> (Quadrant IV).<br>3. z remains unchanged: <b>z = 7</b>.<br>Result: <b>(5.385, -68.20°, 7)</b>.",
+        calc: "<b>Canon F-789SGA Built-in Pol Function (Degree Mode):</b><br>Press <kbd class='calc-key key-gold'>SHIFT</kbd><kbd class='calc-key key-dark'>+ (Pol)</kbd> <kbd class='calc-key key-dark'>2</kbd> <kbd class='calc-key key-gold'>SHIFT</kbd><kbd class='calc-key key-dark'>) (,)</kbd> <kbd class='calc-key key-dark'>-5</kbd> <kbd class='calc-key key-dark'>)</kbd> <kbd class='calc-key key-dark'>=</kbd><br>Screen displays: <b>r = 5.385164807, θ = -68.19859°</b>.<br>Combine with z = 7 → <b>(5.385, -68.20°, 7)</b>."
+      },
+      {
+        id: 13,
+        source: 'reviewer',
+        topic: 'Coordinates',
+        q: "Find the distance from C to D if the coordinates are given as C(-3, 2, 1) and D(r = 5, θ = 20°, φ = -70°).",
+        choices: [
+          "5.99 units",
+          "9.07 units",
+          "7.90 units",
+          "6.29 units"
+        ],
+        answer: 3, // D
+        manual: "1. Convert D from Spherical (r, θ, φ) to Cartesian (x, y, z):<br>• x = r sin θ cos φ = 5 sin(20°) cos(-70°) = 0.5849<br>• y = r sin θ sin φ = 5 sin(20°) sin(-70°) = -1.6070<br>• z = r cos θ = 5 cos(20°) = 4.6985 → D(0.5849, -1.6070, 4.6985)<br>2. Distance d = <span class='radicand'>√((-3 - 0.5849)² + (2 - (-1.6070))² + (1 - 4.6985)²)</span><br>= <span class='radicand'>√(12.851 + 13.010 + 13.679)</span> = <span class='radicand'>√39.540</span> = <b>6.29 units</b>.",
+        calc: "<b>Canon F-789SGA Step-by-Step Calc Method:</b><br>1. Rec(5, 20) → X=4.6985 (z), Y=1.7101 (ρ).<br>2. Rec(1.7101, -70) → X=0.5849 (x), Y=-1.6070 (y).<br>3. In <kbd class='calc-key key-purple'>MODE 8</kbd>: VctA=[-3, 2, 1], VctB=[0.5849, -1.6070, 4.6985].<br>4. Compute: `Abs(VctB - VctA)` <kbd class='calc-key key-dark'>=</kbd> → <b>6.2881 ≈ 6.29</b>."
+      },
+      {
+        id: 14,
+        source: 'reviewer',
+        topic: 'Coordinates',
+        q: "The spherical coordinates are (13, 22.62 deg, 53.13 deg). The corresponding cylindrical coordinates are:",
+        choices: [
+          "(12, 53.13 deg, 5)",
+          "(5, 53.13 deg, 12)",
+          "(13, 22.62 deg, 5)",
+          "(13, 53.13 deg, 5)"
+        ],
+        answer: 1, // B
+        manual: "Spherical (r, θ, φ) to Cylindrical (ρ, φ, z):<br>• ρ = r sin θ = 13 sin(22.62°) = <b>5</b><br>• φ remains unchanged = <b>53.13°</b><br>• z = r cos θ = 13 cos(22.62°) = <b>12</b><br>Result: <b>(5, 53.13°, 12)</b>.",
+        calc: "<b>⚠️ HUGE BOARD EXAM TRAP ON CANON F-789SGA:</b><br>Press <kbd class='calc-key key-gold'>SHIFT</kbd><kbd class='calc-key key-dark'>- (Rec)</kbd> <kbd class='calc-key key-dark'>13, 22.62</kbd> <kbd class='calc-key key-dark'>=</kbd><br>Calculator displays: <b>X = 12.000</b> and <b>Y = 5.000</b>.<br><i>CRITICAL:</i> X is <b>z</b> (12) and Y is <b>ρ</b> (5)! Do NOT pick Option A (12, 53.13°, 5). Swap X and Y into (ρ, φ, z) = <b>(5, 53.13°, 12)</b>!"
+      },
+      {
+        id: 15,
+        source: 'reviewer',
+        topic: 'Del Operators',
+        q: "Find the divergence of <span class='math-font'>F</span> = (x² + yz)<span class='vec-symbol'>î</span> + (y² + zx)<span class='vec-symbol'>ĵ</span> + (z² + xy)<span class='vec-symbol'>k̂</span> at (1, 2, 3).",
+        choices: [
+          "24",
+          "12",
+          "36",
+          "18"
+        ],
+        answer: 1, // B
+        manual: "∇ · <span class='math-font'>F</span> = <span class='frac'><span class='num'>∂F<sub>x</sub></span><span class='den'>∂x</span></span> + <span class='frac'><span class='num'>∂F<sub>y</sub></span><span class='den'>∂y</span></span> + <span class='frac'><span class='num'>∂F<sub>z</sub></span><span class='den'>∂z</span></span><br>= <span class='frac'><span class='num'>∂(x²+yz)</span><span class='den'>∂x</span></span> + <span class='frac'><span class='num'>∂(y²+zx)</span><span class='den'>∂y</span></span> + <span class='frac'><span class='num'>∂(z²+xy)</span><span class='den'>∂z</span></span><br>= 2x + 2y + 2z.<br><br>Evaluate at (1, 2, 3): 2(1) + 2(2) + 2(3) = 2 + 4 + 6 = <b>12</b>.",
+        calc: "<b>Canon F-789SGA Point Derivative Trick [MODE 1]:</b><br>Compute sum of partial derivatives with <kbd class='calc-key key-gold'>SHIFT</kbd><kbd class='calc-key key-dark'>∫ (d/dx)</kbd> by plugging in constants for other variables:<br>`d/dx(X² + 2×3)|_{X=1} + d/dx(X² + 3×1)|_{X=2} + d/dx(X² + 1×2)|_{X=3}` <kbd class='calc-key key-dark'>=</kbd> → <b>12</b>!"
+      },
+      {
+        id: 16,
+        source: 'reviewer',
+        topic: 'Del Operators',
+        q: "Determine the constant <span class='math-font'>a</span> so that the vector <span class='math-font'>V</span> = (x + 3y)<span class='vec-symbol'>î</span> + (y − 2z)<span class='vec-symbol'>ĵ</span> + (x + az)<span class='vec-symbol'>k̂</span> is <b>solenoidal</b>.",
+        choices: [
+          "-1",
+          "-4/3",
+          "-2",
+          "-2/5"
+        ],
+        answer: 2, // C
+        manual: "A vector field is <b>solenoidal</b> if its divergence equals zero (∇ · <span class='math-font'>V</span> = 0).<br><br>∇ · <span class='math-font'>V</span> = <span class='frac'><span class='num'>∂(x+3y)</span><span class='den'>∂x</span></span> + <span class='frac'><span class='num'>∂(y−2z)</span><span class='den'>∂y</span></span> + <span class='frac'><span class='num'>∂(x+az)</span><span class='den'>∂z</span></span> = 1 + 1 + a = 0<br>2 + a = 0 → <b>a = -2</b>.",
+        calc: "<b>Mental Partial Derivative Rule:</b><br>Keyword <b>SOLENOIDAL = Divergence-Free (∇ · V = 0)</b>.<br>Sum the coefficients of x in <span class='vec-symbol'>î</span>, y in <span class='vec-symbol'>ĵ</span>, and z in <span class='vec-symbol'>k̂</span>:<br>1 + 1 + a = 0 → <b>a = -2</b>."
+      },
+      {
+        id: 17,
+        source: 'reviewer',
+        topic: 'Del Operators',
+        q: "Find the curl of <span class='math-font'>F</span> = (x² + yz)<span class='vec-symbol'>î</span> + (y² + zx)<span class='vec-symbol'>ĵ</span> + (z² + xy)<span class='vec-symbol'>k̂</span> at (1, 2, 3).",
+        choices: [
+          "0",
+          "2î + 2ĵ + 2k̂",
+          "2î + 3k̂",
+          "-4ĵ"
+        ],
+        answer: 0, // A
+        manual: "∇ × <span class='math-font'>F</span> = (<span class='frac'><span class='num'>∂F<sub>z</sub></span><span class='den'>∂y</span></span> − <span class='frac'><span class='num'>∂F<sub>y</sub></span><span class='den'>∂z</span></span>)<span class='vec-symbol'>î</span> + (<span class='frac'><span class='num'>∂F<sub>x</sub></span><span class='den'>∂z</span></span> − <span class='frac'><span class='num'>∂F<sub>z</sub></span><span class='den'>∂x</span></span>)<span class='vec-symbol'>ĵ</span> + (<span class='frac'><span class='num'>∂F<sub>y</sub></span><span class='den'>∂x</span></span> − <span class='frac'><span class='num'>∂F<sub>x</sub></span><span class='den'>∂y</span></span>)<span class='vec-symbol'>k̂</span><br>= (x − x)<span class='vec-symbol'>î</span> + (y − y)<span class='vec-symbol'>ĵ</span> + (z − z)<span class='vec-symbol'>k̂</span> = 0<span class='vec-symbol'>î</span> + 0<span class='vec-symbol'>ĵ</span> + 0<span class='vec-symbol'>k̂</span> = <b>0</b>.",
+        calc: "<b>Canon F-789SGA Component Point Check [MODE 1]:</b><br>Check i-component at (1,2,3):<br>`d/dx(3² + 1·X)|_{X=2} − d/dx(2² + X·1)|_{X=3}` = 1 − 1 = 0.<br>Same for j (2−2=0) and k (3−3=0) → <b>0</b>."
+      },
+      {
+        id: 18,
+        source: 'reviewer',
+        topic: 'Del Operators',
+        q: "For the scalar field u = x²/2 + y²/3, the magnitude of the gradient at the point (1, 3) is:",
+        choices: [
+          "√(13/9)",
+          "√(9/2)",
+          "√5",
+          "9/2"
+        ],
+        answer: 2, // C
+        manual: "∇u = <span class='frac'><span class='num'>∂u</span><span class='den'>∂x</span></span><span class='vec-symbol'>î</span> + <span class='frac'><span class='num'>∂u</span><span class='den'>∂y</span></span><span class='vec-symbol'>ĵ</span> = (2x/2)<span class='vec-symbol'>î</span> + (2y/3)<span class='vec-symbol'>ĵ</span> = x<span class='vec-symbol'>î</span> + (2/3)y<span class='vec-symbol'>ĵ</span>.<br>At (1, 3): ∇u = (1)<span class='vec-symbol'>î</span> + (2/3)(3)<span class='vec-symbol'>ĵ</span> = <span class='vec-symbol'>î</span> + 2<span class='vec-symbol'>ĵ</span>.<br>Magnitude |∇u| = <span class='radicand'>√(1² + 2²)</span> = <b>√5</b>.",
+        calc: "<b>Canon F-789SGA Direct Point Derivative [MODE 1]:</b><br>Type: `√( (d/dx(X²/2)|_{X=1})² + (d/dx(X²/3)|_{X=3})² )` <kbd class='calc-key key-dark'>=</kbd> → <b>2.236067977</b>.<br>Square the result: <kbd class='calc-key key-dark'>Ans</kbd> <kbd class='calc-key key-dark'>x²</kbd> <kbd class='calc-key key-dark'>=</kbd> → 5 → <b>√5</b>."
+      },
+      {
+        id: 19,
+        source: 'reviewer',
+        topic: 'Del Operators',
+        q: "For the function φ = ax²y − y³ to represent the velocity potential of an ideal fluid, ∇²φ should be equal to zero. In that case, the value of '<span class='math-font'>a</span>' has to be:",
+        choices: [
+          "-1",
+          "1",
+          "-3",
+          "3"
+        ],
+        answer: 3, // D
+        manual: "Laplacian ∇²φ = <span class='frac'><span class='num'>∂²φ</span><span class='den'>∂x²</span></span> + <span class='frac'><span class='num'>∂²φ</span><span class='den'>∂y²</span></span> + <span class='frac'><span class='num'>∂²φ</span><span class='den'>∂z²</span></span> = 0.<br>First partials: <span class='frac'><span class='num'>∂φ</span><span class='den'>∂x</span></span> = 2axy; <span class='frac'><span class='num'>∂φ</span><span class='den'>∂y</span></span> = ax² − 3y².<br>Second partials: <span class='frac'><span class='num'>∂²φ</span><span class='den'>∂x²</span></span> = 2ay; <span class='frac'><span class='num'>∂²φ</span><span class='den'>∂y²</span></span> = -6y.<br>Set sum to 0: 2ay − 6y = 0 → (2a − 6)y = 0 → 2a = 6 → <b>a = 3</b>.",
+        calc: "<b>Manual Derivative Verification:</b><br>Plug a = 3 into 2ay − 6y = 6y − 6y = 0. Clean identity!"
+      },
+      {
+        id: 20,
+        source: 'reviewer',
+        topic: 'Del Operators',
+        q: "The directional derivative of the function f(x, y) = x² + y² at (1, 2) in the direction of (4<span class='vec-symbol'>î</span> + 3<span class='vec-symbol'>ĵ</span>) is:",
+        choices: [
+          "4/5",
+          "4",
+          "2/5",
+          "1"
+        ],
+        answer: 1, // B
+        manual: "1. Gradient ∇f = 2x<span class='vec-symbol'>î</span> + 2y<span class='vec-symbol'>ĵ</span>. At (1, 2): ∇f = 2<span class='vec-symbol'>î</span> + 4<span class='vec-symbol'>ĵ</span>.<br>2. Unit vector û = <span class='frac'><span class='num'>4î + 3ĵ</span><span class='den'>√(4²+3²)</span></span> = <span class='frac'><span class='num'>4î + 3ĵ</span><span class='den'>5</span></span>.<br>3. Directional Derivative D<sub>u</sub>f = ∇f · û = <span class='frac'><span class='num'>(2)(4) + (4)(3)</span><span class='den'>5</span></span> = <span class='frac'><span class='num'>8 + 12</span><span class='den'>5</span></span> = <span class='frac'><span class='num'>20</span><span class='den'>5</span></span> = <b>4</b>.",
+        calc: "<b>Canon F-789SGA Hybrid Method:</b><br>1. In <kbd class='calc-key key-purple'>MODE 1</kbd>: `d/dx(X²)|_{X=1} = 2` and `d/dx(X²)|_{X=2} = 4`.<br>2. In <kbd class='calc-key key-purple'>MODE 8</kbd> (2D): VctA=[2, 4], VctB=[4, 3].<br>3. Compute: `(VctA · VctB) ÷ Abs(VctB)` <kbd class='calc-key key-dark'>=</kbd> → <b>4</b>.<br><i>⚠️ Don't forget to divide by vector magnitude 5!</i>"
+      },
+      {
+        id: 21,
+        source: 'reviewer',
+        topic: 'Del Operators',
+        q: "The vector field <span class='math-font'>F</span> = x<span class='vec-symbol'>î</span> − y<span class='vec-symbol'>ĵ</span> is:",
+        choices: [
+          "Divergence free, but not irrotational",
+          "Irrotational, but not divergence free",
+          "Divergence free and irrotational",
+          "Neither divergence free nor irrotational"
+        ],
+        answer: 2, // C
+        manual: "• Divergence: ∇ · <span class='math-font'>F</span> = <span class='frac'><span class='num'>∂(x)</span><span class='den'>∂x</span></span> + <span class='frac'><span class='num'>∂(-y)</span><span class='den'>∂y</span></span> = 1 + (-1) = 0 → <b>Divergence free (Solenoidal)</b>.<br>• Curl: ∇ × <span class='math-font'>F</span> = (<span class='frac'><span class='num'>∂(-y)</span><span class='den'>∂x</span></span> − <span class='frac'><span class='num'>∂(x)</span><span class='den'>∂y</span></span>)<span class='vec-symbol'>k̂</span> = (0 − 0)<span class='vec-symbol'>k̂</span> = 0 → <b>Irrotational</b>.<br>Therefore, it is <b>both divergence free and irrotational</b>.",
+        calc: "<b>Conceptual Anchor:</b><br>• ∇ · F = 0 → Divergence Free<br>• ∇ × F = 0 → Irrotational"
+      },
+      {
+        id: 22,
+        source: 'reviewer',
+        topic: 'Del Operators',
+        q: "If <span class='math-font'>F</span> = x²y <span class='vec-symbol'>î</span> − 2xz <span class='vec-symbol'>ĵ</span> + 2yz <span class='vec-symbol'>k̂</span>, find ∇ × (∇ × <span class='math-font'>F</span>).",
+        choices: [
+          "3yî",
+          "(-2z + 3y)k̂",
+          "0",
+          "(2x + 2)ĵ"
+        ],
+        answer: 3, // D
+        manual: "<b>Vector Identity Method: ∇ × (∇ × F) = ∇(∇ · F) − ∇²F</b><br>1. Divergence ∇ · <span class='math-font'>F</span> = <span class='frac'><span class='num'>∂(x²y)</span><span class='den'>∂x</span></span> + <span class='frac'><span class='num'>∂(-2xz)</span><span class='den'>∂y</span></span> + <span class='frac'><span class='num'>∂(2yz)</span><span class='den'>∂z</span></span> = 2xy + 0 + 2y = 2xy + 2y.<br>2. Gradient of div: ∇(∇·F) = <span class='frac'><span class='num'>∂(2xy+2y)</span><span class='den'>∂x</span></span><span class='vec-symbol'>î</span> + <span class='frac'><span class='num'>∂(2xy+2y)</span><span class='den'>∂y</span></span><span class='vec-symbol'>ĵ</span> = 2y<span class='vec-symbol'>î</span> + (2x + 2)<span class='vec-symbol'>ĵ</span>.<br>3. Laplacian ∇²<span class='math-font'>F</span> = ∇²(x²y)<span class='vec-symbol'>î</span> = 2y<span class='vec-symbol'>î</span>.<br>4. Subtract: [2y<span class='vec-symbol'>î</span> + (2x+2)<span class='vec-symbol'>ĵ</span>] − 2y<span class='vec-symbol'>î</span> = <b>(2x + 2)<span class='vec-symbol'>ĵ</span></b>.",
+        calc: "<b>Class Solved Item:</b><br>The identity ∇(∇·F) − ∇²F is much faster than computing two consecutive 3×3 curl determinants!"
+      },
+      {
+        id: 23,
+        source: 'reviewer',
+        topic: 'Vectors',
+        q: "The angle (in degree) between two planar vectors <span class='math-font'>a</span> = (√3/2)<span class='vec-symbol'>î</span> + (1/2)<span class='vec-symbol'>ĵ</span> and <span class='math-font'>b</span> = (-√3/2)<span class='vec-symbol'>î</span> + (1/2)<span class='vec-symbol'>ĵ</span> is:",
+        choices: [
+          "30",
+          "60",
+          "90",
+          "120"
+        ],
+        answer: 3, // D
+        manual: "1. Both are unit vectors: |<span class='math-font'>a</span>| = <span class='radicand'>√(3/4 + 1/4)</span> = 1, |<span class='math-font'>b</span>| = 1.<br>2. Dot product: <span class='math-font'>a</span> · <span class='math-font'>b</span> = (√3/2)(-√3/2) + (1/2)(1/2) = -3/4 + 1/4 = -1/2.<br>3. cos θ = -1/2 → θ = cos⁻¹(-0.5) = <b>120°</b>.<br><br><i>(Geometric visual: vector a is at 30° and vector b is at 150°. Difference = 150° − 30° = 120°)</i>.",
+        calc: "<b>Canon F-789SGA (Degree Mode):</b><br><kbd class='calc-key key-purple'>MODE 8</kbd> (2D) → VctA=[√3÷2, 0.5], VctB=[-√3÷2, 0.5].<br>Compute: <kbd class='calc-key key-gold'>SHIFT</kbd><kbd class='calc-key key-dark'>cos</kbd>((VctA · VctB) ÷ (Abs(VctA)Abs(VctB))) <kbd class='calc-key key-dark'>=</kbd> → <b>120°</b>."
+      },
+      {
+        id: 24,
+        source: 'reviewer',
+        topic: 'Integral Theorems',
+        q: "Stokes' theorem connects:",
+        choices: [
+          "a line integral and a surface integral",
+          "a surface integral and a volume integral",
+          "a line integral and a volume integral",
+          "gradient of a function and its surface integral"
+        ],
+        answer: 0, // A
+        manual: "Stokes' theorem: ∮<sub>C</sub> <span class='math-font'>F</span> · d<span class='math-font'>r</span> = ∬<sub>S</sub> (∇ × <span class='math-font'>F</span>) · n̂ dS.<br>It connects a closed <b>line integral</b> around boundary curve C to a <b>surface integral</b> of the curl over open surface S.<br><br><i>(Gauss Divergence connects surface & volume)</i>.",
+        calc: "<b>Integral Theorems Pair Memory Rule:</b><br>• <b>Stokes' & Green's:</b> Line ↔ Surface<br>• <b>Gauss Divergence:</b> Surface ↔ Volume"
+      },
+      {
+        id: 25,
+        source: 'reviewer',
+        topic: 'Integral Theorems',
+        q: "Which one of the following is NOT associated with vector calculus?",
+        choices: [
+          "Stokes' theorem",
+          "Gauss Divergence theorem",
+          "Green's theorem",
+          "Kennedy's theorem"
+        ],
+        answer: 3, // D
+        manual: "Stokes', Gauss Divergence, and Green's theorems are the 3 foundational integral theorems of vector calculus.<br><br><b>Kennedy's theorem</b> (Aronhold-Kennedy theorem) belongs to kinematics of machinery (3 relative instant centers lie on a straight line), NOT vector calculus.",
+        calc: "<b>Board Exam Distractor:</b> Kennedy's theorem is a classic mechanics/kinematics distractor on ECE board exams!"
+      },
+      {
+        id: 26,
+        source: 'reviewer',
+        topic: 'Del Operators',
+        q: "Find the divergence of the vector field <span class='math-font'>v</span>(x, y, z) = -(x cos xy)<span class='vec-symbol'>î</span> + (y cos xy)<span class='vec-symbol'>ĵ</span> + [(sin z²) + x² + y²]<span class='vec-symbol'>k̂</span>.",
+        choices: [
+          "2z cos z²",
+          "sin xy + 2z cos z²",
+          "x sin xy − cos z",
+          "None of these"
+        ],
+        answer: 0, // A
+        manual: "Use product rule d(uv) = u dv + v du:<br>1. <span class='frac'><span class='num'>∂(-x cos xy)</span><span class='den'>∂x</span></span> = -[cos(xy) + x(-y sin xy)] = -cos(xy) + xy sin(xy).<br>2. <span class='frac'><span class='num'>∂(y cos xy)</span><span class='den'>∂y</span></span> = cos(xy) + y(-x sin xy) = cos(xy) − xy sin(xy).<br>3. Notice x and y terms cancel out completely to 0!<br>4. <span class='frac'><span class='num'>∂(sin z² + x² + y²)</span><span class='den'>∂z</span></span> = <b>2z cos(z²)</b>.<br>Total divergence = <b>2z cos z²</b>.",
+        calc: "<b>Canon F-789SGA Numerical Verification Trick (RADIAN MODE, MODE 1):</b><br>Test point (1, 1, 1):<br>`d/dx(-X cos(X·1))|_{X=1} + d/dx(X cos(1·X))|_{X=1} + d/dx(sin(X²) + 2)|_{X=1}` <kbd class='calc-key key-dark'>=</kbd> → <b>1.0806046</b>.<br>Now evaluate Option A at z=1: `2(1)cos(1²)` = <b>1.0806046</b> — Exact Match!"
+      },
+      {
+        id: 27,
+        source: 'reviewer',
+        topic: 'Vectors',
+        q: "What is the magnitude of the vector <span class='math-font'>v</span> = (1/√3)<span class='vec-symbol'>î</span> + (1/√3)<span class='vec-symbol'>ĵ</span> + (1/√3)<span class='vec-symbol'>k̂</span>?",
+        choices: [
+          "0",
+          "1",
+          "2",
+          "3"
+        ],
+        answer: 1, // B
+        manual: "|<span class='math-font'>v</span>| = <span class='radicand'>√((1/√3)² + (1/√3)² + (1/√3)²)</span> = <span class='radicand'>√(1/3 + 1/3 + 1/3)</span> = <span class='radicand'>√1</span> = <b>1</b>.<br><br><i>(This is a standard normalized unit vector)</i>.",
+        calc: "<b>Canon F-789SGA:</b><br><kbd class='calc-key key-purple'>MODE 8</kbd> → VctA = [1÷√3, 1÷√3, 1÷√3].<br>Compute: <kbd class='calc-key key-gold'>SHIFT</kbd><kbd class='calc-key key-dark'>hyp (Abs)</kbd> <kbd class='calc-key key-cyan'>Apps</kbd><kbd class='calc-key key-dark'>3</kbd> <kbd class='calc-key key-dark'>=</kbd> → <b>1</b>."
+      },
+      {
+        id: 28,
+        source: 'reviewer',
+        topic: 'Del Operators',
+        q: "For a scalar function f(x, y, z) = x² + 3y² + 2z², the gradient at the point P(1, 2, -1) is:",
+        choices: [
+          "2î + 6ĵ + 4k̂",
+          "2î + 12ĵ − 4k̂",
+          "2î + 12ĵ + 4k̂",
+          "√56"
+        ],
+        answer: 1, // B
+        manual: "1. ∇f = <span class='frac'><span class='num'>∂f</span><span class='den'>∂x</span></span><span class='vec-symbol'>î</span> + <span class='frac'><span class='num'>∂f</span><span class='den'>∂y</span></span><span class='vec-symbol'>ĵ</span> + <span class='frac'><span class='num'>∂f</span><span class='den'>∂z</span></span><span class='vec-symbol'>k̂</span> = 2x<span class='vec-symbol'>î</span> + 6y<span class='vec-symbol'>ĵ</span> + 4z<span class='vec-symbol'>k̂</span>.<br>2. Substitute P(1, 2, -1): 2(1)<span class='vec-symbol'>î</span> + 6(2)<span class='vec-symbol'>ĵ</span> + 4(-1)<span class='vec-symbol'>k̂</span> = <b>2<span class='vec-symbol'>î</span> + 12<span class='vec-symbol'>ĵ</span> − 4<span class='vec-symbol'>k̂</span></b>.<br><br><i>(⚠️ Trap Alert: Option D √56 is the magnitude |∇f|, not the gradient vector itself!)</i>",
+        calc: "<b>Canon F-789SGA Point-Check [MODE 1]:</b><br>• x-comp: `d/dx(X²)|_{X=1} = 2`<br>• y-comp: `d/dx(3X²)|_{X=2} = 12`<br>• z-comp: `d/dx(2X²)|_{X=-1} = -4`<br>Result: <b>2î + 12ĵ − 4k̂</b>."
+      },
+
+      // ----------------- PART B: 12 FRESH TWIST VARIANT ITEMS (29 to 40) -----------------
+      {
+        id: 29,
+        source: 'variant',
+        topic: 'Vectors',
+        q: "Find the magnitude of vector <span class='math-font'>B</span> with initial point M(1, -2, 3) and terminal point N(4, 2, 3).",
+        choices: [
+          "4",
+          "5",
+          "√13",
+          "7"
+        ],
+        answer: 1, // B
+        manual: "MN = N − M = (4−1)<span class='vec-symbol'>î</span> + (2−(-2))<span class='vec-symbol'>ĵ</span> + (3−3)<span class='vec-symbol'>k̂</span> = 3<span class='vec-symbol'>î</span> + 4<span class='vec-symbol'>ĵ</span> + 0<span class='vec-symbol'>k̂</span>.<br>Magnitude |MN| = <span class='radicand'>√(3² + 4² + 0²)</span> = √25 = <b>5</b>.",
+        calc: "<b>Canon F-789SGA:</b><br><kbd class='calc-key key-purple'>MODE 8</kbd> → VctA=[1,-2,3], VctB=[4,2,3]. Compute `Abs(VctB - VctA)` <kbd class='calc-key key-dark'>=</kbd> → <b>5</b>."
+      },
+      {
+        id: 30,
+        source: 'variant',
+        topic: 'Vectors',
+        q: "If <span class='math-font'>a</span> = <span class='vec-symbol'>î</span> − <span class='vec-symbol'>ĵ</span> + <span class='vec-symbol'>k̂</span> and <span class='math-font'>b</span> = 2<span class='vec-symbol'>î</span> + <span class='vec-symbol'>ĵ</span> − <span class='vec-symbol'>k̂</span>, find a unit vector parallel to 3<span class='math-font'>a</span> − <span class='math-font'>b</span>.",
+        choices: [
+          "(î − 4ĵ + 4k̂)/√33",
+          "(î − 2ĵ + 2k̂)/3",
+          "(5î − 2ĵ + 2k̂)/√33",
+          "(î + 4ĵ − 4k̂)/√33"
+        ],
+        answer: 0, // A
+        manual: "3<span class='math-font'>a</span> − <span class='math-font'>b</span> = (3−2)<span class='vec-symbol'>î</span> + (-3−1)<span class='vec-symbol'>ĵ</span> + (3−(-1))<span class='vec-symbol'>k̂</span> = <span class='vec-symbol'>î</span> − 4<span class='vec-symbol'>ĵ</span> + 4<span class='vec-symbol'>k̂</span>.<br>Magnitude = <span class='radicand'>√(1² + (-4)² + 4²)</span> = √33.<br>Unit Vector = <b>(<span class='vec-symbol'>î</span> − 4<span class='vec-symbol'>ĵ</span> + 4<span class='vec-symbol'>k̂</span>)/√33</b>.",
+        calc: "<b>Canon F-789SGA:</b><br><kbd class='calc-key key-purple'>MODE 8</kbd> → VctA=[1,-1,1], VctB=[2,1,-1]. Compute `3VctA - VctB` → [1, -4, 4]. Divide by Abs → [0.1741, -0.6963, 0.6963], matching 1/√33."
+      },
+      {
+        id: 31,
+        source: 'variant',
+        topic: 'Vectors',
+        q: "Find the positive value of <span class='math-font'>y</span> if vector <span class='math-font'>A</span> = 0.6<span class='vec-symbol'>î</span> + <span class='math-font'>y</span><span class='vec-symbol'>ĵ</span> + 0.4<span class='vec-symbol'>k̂</span> is a unit vector.",
+        choices: [
+          "√0.52",
+          "√0.48",
+          "√0.64",
+          "0.50"
+        ],
+        answer: 1, // B
+        manual: "0.6² + y² + 0.4² = 1 → 0.36 + y² + 0.16 = 1 → y² = 1 − 0.52 = 0.48 → <b>y = √0.48</b>.",
+        calc: "<b>Canon F-789SGA:</b><br><kbd class='calc-key key-purple'>MODE 1</kbd> → Solve `1 = √(0.6² + X² + 0.4²)` → X = 0.69282. Ans² = 0.48 → <b>√0.48</b>."
+      },
+      {
+        id: 32,
+        source: 'variant',
+        topic: 'Vectors',
+        q: "The angle between <span class='math-font'>A</span> = 2<span class='vec-symbol'>î</span> + 3<span class='vec-symbol'>ĵ</span> + 6<span class='vec-symbol'>k̂</span> and <span class='math-font'>B</span> = <span class='vec-symbol'>î</span> + 2<span class='vec-symbol'>ĵ</span> + 2<span class='vec-symbol'>k̂</span> in radians is nearly:",
+        choices: [
+          "0.31 rad",
+          "0.62 rad",
+          "1.26 rad",
+          "17.75 rad"
+        ],
+        answer: 0, // A
+        manual: "A·B = 2(1)+3(2)+6(2) = 20. |A| = √(4+9+36) = 7. |B| = √(1+4+4) = 3.<br>cos θ = 20/21 = 0.95238 → θ = cos⁻¹(0.95238) = <b>0.3098 rad ≈ 0.31 rad</b>.<br><br><i>(⚠️ Note: 17.75 is the angle in degrees — don't fall for it!)</i>",
+        calc: "<b>Radian Mode Trap:</b> Switch to Radian Mode (<kbd class='calc-key key-gold'>SHIFT</kbd><kbd class='calc-key key-purple'>MODE</kbd><kbd class='calc-key key-dark'>4</kbd>). Compute cos⁻¹(20/21) = <b>0.3098 rad</b>."
+      },
+      {
+        id: 33,
+        source: 'variant',
+        topic: 'Vectors',
+        q: "If |<span class='math-font'>a</span> × <span class='math-font'>b</span>| = 6 and |<span class='math-font'>a</span> · <span class='math-font'>b</span>| = 8, then |<span class='math-font'>a</span>||<span class='math-font'>b</span>| (NOT squared!) is equal to:",
+        choices: [
+          "100",
+          "10",
+          "14",
+          "48"
+        ],
+        answer: 1, // B
+        manual: "Square & Add gives: (|a||b|)² = 6² + 8² = 36 + 64 = 100.<br><b>⚠️ BOARD TWIST:</b> The problem asks for |a||b|, NOT (|a||b|)²! Take square root: |a||b| = √100 = <b>10</b>.",
+        calc: "<b>Fast Pol Trick:</b> In <kbd class='calc-key key-purple'>MODE 1</kbd>, press `Pol(8, 6)` <kbd class='calc-key key-dark'>=</kbd> → <b>r = 10</b>!"
+      },
+      {
+        id: 34,
+        source: 'variant',
+        topic: 'Coordinates',
+        q: "Convert Cartesian coordinates (-3, 4, -2) to Cylindrical coordinates (ρ, φ, z).",
+        choices: [
+          "(5, -53.13°, -2)",
+          "(5, 126.87°, -2)",
+          "(5, 53.13°, -2)",
+          "(25, 126.87°, -2)"
+        ],
+        answer: 1, // B
+        manual: "ρ = √((-3)² + 4²) = 5. Since x < 0 and y > 0, the point is in <b>Quadrant II</b>: φ = 180° + tan⁻¹(4/-3) = 180° − 53.13° = <b>126.87°</b>. z = -2.",
+        calc: "<b>Canon Pol Function Auto-Quadrant Fix:</b><br>Press `Pol(-3, 4)` <kbd class='calc-key key-dark'>=</kbd> → <b>r = 5, θ = 126.87°</b>. Pol automatically handles Quadrant II!"
+      },
+      {
+        id: 35,
+        source: 'variant',
+        topic: 'Coordinates',
+        q: "Convert Spherical coordinates (10, 36.87°, 45°) to Cylindrical coordinates (ρ, φ, z).",
+        choices: [
+          "(8, 45°, 6)",
+          "(6, 45°, 8)",
+          "(6, 36.87°, 8)",
+          "(10, 45°, 8)"
+        ],
+        answer: 1, // B
+        manual: "ρ = r sin θ = 10 sin(36.87°) = <b>6</b>; φ = <b>45°</b>; z = r cos θ = 10 cos(36.87°) = <b>8</b>.<br>Cylindrical = <b>(6, 45°, 8)</b>.",
+        calc: "<b>Rec Shortcut (Degree Mode):</b><br>`Rec(10, 36.87)` <kbd class='calc-key key-dark'>=</kbd> → X = 8 (which is z), Y = 6 (which is ρ). Swap order to (ρ, φ, z) = <b>(6, 45°, 8)</b>!"
+      },
+      {
+        id: 36,
+        source: 'variant',
+        topic: 'Del Operators',
+        q: "Find <span class='math-font'>k</span> so that <span class='math-font'>F</span> = (2x + y)<span class='vec-symbol'>î</span> + (ky − z)<span class='vec-symbol'>ĵ</span> + (3z + x)<span class='vec-symbol'>k̂</span> is solenoidal.",
+        choices: [
+          "5",
+          "-5",
+          "-1",
+          "1"
+        ],
+        answer: 1, // B
+        manual: "Solenoidal means ∇ · <span class='math-font'>F</span> = 0 → 2 + k + 3 = 0 → 5 + k = 0 → <b>k = -5</b>.",
+        calc: "<b>Mental Coefficient Sum:</b> Sum x-coeff in i (2), y-coeff in j (k), z-coeff in k (3): 2 + k + 3 = 0 → <b>k = -5</b>."
+      },
+      {
+        id: 37,
+        source: 'variant',
+        topic: 'Del Operators',
+        q: "For φ = kx²y − 2y³ to satisfy Laplace's equation (∇²φ = 0), what must <span class='math-font'>k</span> equal?",
+        choices: [
+          "3",
+          "-6",
+          "6",
+          "12"
+        ],
+        answer: 2, // C
+        manual: "∂²φ/∂x² = 2ky; ∂²φ/∂y² = -12y. ∇²φ = 2ky − 12y = 0 → 2k = 12 → <b>k = 6</b>.",
+        calc: "<b>Quick 2nd Derivatives:</b> 2k − 12 = 0 → k = 6."
+      },
+      {
+        id: 38,
+        source: 'variant',
+        topic: 'Del Operators',
+        q: "Find the directional derivative of f(x, y) = x²y + y² at (1, 1) in the direction of 3<span class='vec-symbol'>î</span> + 4<span class='vec-symbol'>ĵ</span>.",
+        choices: [
+          "18",
+          "3.6",
+          "2.4",
+          "5.0"
+        ],
+        answer: 1, // B
+        manual: "∇f = (2xy)<span class='vec-symbol'>î</span> + (x² + 2y)<span class='vec-symbol'>ĵ</span>. At (1, 1): ∇f = 2<span class='vec-symbol'>î</span> + 3<span class='vec-symbol'>ĵ</span>. Direction û = (3<span class='vec-symbol'>î</span> + 4<span class='vec-symbol'>ĵ</span>)/5.<br>D<sub>u</sub>f = ((2)(3) + (3)(4))/5 = 18/5 = <b>3.6</b>.",
+        calc: "<b>Canon F-789SGA:</b><br>1. Partial derivatives at (1,1): d/dx → 2, d/dy → 3.<br>2. Vector dot: VctA=[2,3], VctB=[3,4]. `(VctA · VctB) ÷ Abs(VctB)` = 18/5 = <b>3.6</b>."
+      },
+      {
+        id: 39,
+        source: 'variant',
+        topic: 'Del Operators',
+        q: "Evaluate the divergence of <span class='math-font'>F</span> = x³<span class='vec-symbol'>î</span> + y²z<span class='vec-symbol'>ĵ</span> + xz²<span class='vec-symbol'>k̂</span> at the point (1, 2, -1).",
+        choices: [
+          "3",
+          "-3",
+          "5",
+          "-1"
+        ],
+        answer: 1, // B
+        manual: "∇ · <span class='math-font'>F</span> = 3x² + 2yz + 2xz. At (1, 2, -1): 3(1)² + 2(2)(-1) + 2(1)(-1) = 3 − 4 − 2 = <b>-3</b>.",
+        calc: "<b>MODE 1 Derivative Sum:</b> `d/dx(X³)|_{X=1} + d/dx(X²·(-1))|_{X=2} + d/dx(1·X²)|_{X=-1}` = 3 − 4 − 2 = <b>-3</b>."
+      },
+      {
+        id: 40,
+        source: 'variant',
+        topic: 'Del Operators',
+        q: "The planar vector field <span class='math-font'>F</span> = y<span class='vec-symbol'>î</span> − x<span class='vec-symbol'>ĵ</span> is:",
+        choices: [
+          "Divergence free, but not irrotational",
+          "Irrotational, but not divergence free",
+          "Divergence free and irrotational",
+          "Neither divergence free nor irrotational"
+        ],
+        answer: 0, // A
+        manual: "• Div: ∂(y)/∂x + ∂(-x)/∂y = 0 + 0 = 0 (<b>Divergence free</b>).<br>• Curl: (∂(-x)/∂x − ∂(y)/∂y)<span class='vec-symbol'>k̂</span> = (-1 − 1)<span class='vec-symbol'>k̂</span> = -2<span class='vec-symbol'>k̂</span> ≠ 0 (<b>NOT irrotational — rotates clockwise!</b>).",
+        calc: "<b>Rotational Swirl Field Concept:</b> y î − x ĵ describes clockwise circular flow: zero flux expansion (div = 0) but constant vortex spin (curl = -2k̂)."
+      }
+    ];
+
+    // APPLICATION LOGIC COMMAND CENTER
+    class EmagsApp {
+      constructor() {
+        this.sound = new SoundFX();
+        this.confetti = new Confetti();
+        
+        // App State
+        this.mode = 'drill'; // 'drill', 'sim', 'variant'
+        this.questions = [];
+        this.currentIndex = 0;
+        this.userAnswers = {}; // { qId: selectedChoiceIndex }
+        this.solutionVisible = {}; // { qId: boolean }
+        
+        // Gamification Stats
+        this.xp = parseInt(localStorage.getItem('emags_xp') || '0');
+        this.streak = 0;
+        
+        // Simulation Mode State
+        this.simQuestions = [];
+        this.simCurrentIndex = 0;
+        this.simAnswers = {}; // { qId: choiceIdx }
+        this.simFlags = {}; // { qId: boolean }
+        this.simTimerSeconds = 30 * 60;
+        this.simTimerInterval = null;
+
+        this.init();
+      }
+
+      init() {
+        this.updateGamificationHUD();
+        this.switchMode('drill');
+
+        // Setup Keyboard Shortcuts
+        document.addEventListener('keydown', (e) => this.handleKeydown(e));
+      }
+
+      updateGamificationHUD() {
+        document.getElementById('hud-streak').textContent = this.streak;
+        document.getElementById('hud-xp-text').textContent = `${this.xp} XP`;
+
+        // Rank Progress Computation
+        const ranks = [
+          { name: 'ECE Reviewee', min: 0 },
+          { name: 'Vector Tactician', min: 100 },
+          { name: 'Del Operator Pro', min: 250 },
+          { name: 'Future R.ECE', min: 500 },
+          { name: 'Board Topnotcher', min: 1000 }
+        ];
+
+        let currentRank = ranks[0];
+        let nextRank = ranks[1];
+
+        for (let i = 0; i < ranks.length; i++) {
+          if (this.xp >= ranks[i].min) {
+            currentRank = ranks[i];
+            nextRank = ranks[i + 1] || ranks[i];
+          }
+        }
+
+        document.getElementById('hud-rank').textContent = currentRank.name;
+        const currentTierXP = this.xp - currentRank.min;
+        const neededTierXP = (nextRank.min - currentRank.min) || 1;
+        const barPercent = Math.min(100, Math.max(0, (currentTierXP / neededTierXP) * 100));
+        document.getElementById('hud-xp-bar').style.width = `${barPercent}%`;
+
+        localStorage.setItem('emags_xp', this.xp.toString());
+      }
+
+      showToast(title, sub = '', type = 'info') {
+        const container = document.getElementById('toast-container');
+        const toast = document.createElement('div');
+        toast.className = `px-4 py-2.5 rounded-xl border shadow-xl flex items-center gap-3 transition-all duration-300 transform translate-x-10 opacity-0 ${
+          type === 'success' ? 'bg-emerald-950 border-emerald-500 text-emerald-200' :
+          type === 'error' ? 'bg-rose-950 border-rose-500 text-rose-200' :
+          'bg-navy-800 border-cyan-500 text-cyan-200'
+        }`;
+        
+        toast.innerHTML = `
+          <span class="text-base">${type === 'success' ? '✨' : type === 'error' ? '⚠️' : '⚡'}</span>
+          <div>
+            <div class="font-bold text-xs">${title}</div>
+            ${sub ? `<div class="text-[11px] opacity-80">${sub}</div>` : ''}
+          </div>
+        `;
+
+        container.appendChild(toast);
+        setTimeout(() => {
+          toast.classList.remove('translate-x-10', 'opacity-0');
+        }, 10);
+
+        setTimeout(() => {
+          toast.classList.add('translate-x-10', 'opacity-0');
+          setTimeout(() => toast.remove(), 300);
+        }, 2500);
+      }
+
+      toggleAudio() {
+        this.sound.enabled = !this.sound.enabled;
+        const icon = document.getElementById('audio-icon');
+        icon.textContent = this.sound.enabled ? '🔊' : '🔇';
+        this.showToast(this.sound.enabled ? 'Audio Sound FX Enabled' : 'Audio Sound FX Muted');
+      }
+
+      switchMode(newMode) {
+        this.mode = newMode;
+        
+        // Update Header Button Highlights
+        document.getElementById('btn-mode-drill').className = `px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 ${newMode === 'drill' ? 'bg-cyan-500 text-navy-900 font-bold shadow' : 'text-slate-300 hover:text-white'}`;
+        document.getElementById('btn-mode-sim').className = `px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 ${newMode === 'sim' ? 'bg-amber-500 text-navy-900 font-bold shadow' : 'text-slate-300 hover:text-white'}`;
+        document.getElementById('btn-mode-variant').className = `px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 ${newMode === 'variant' ? 'bg-teal-500 text-navy-900 font-bold shadow' : 'text-slate-300 hover:text-white'}`;
+
+        // Hide View Containers
+        document.getElementById('quiz-view').classList.add('hidden');
+        document.getElementById('sim-view').classList.add('hidden');
+        document.getElementById('sim-results-view').classList.add('hidden');
+
+        if (newMode === 'drill' || newMode === 'variant') {
+          document.getElementById('quiz-view').classList.remove('hidden');
+          const isReviewer = newMode === 'drill';
+          document.getElementById('quiz-badge').textContent = isReviewer ? 'Active Recall Mode (28 Reviewer Items)' : 'Board Twist Variants (12 Fresh Items)';
+          document.getElementById('quiz-badge').className = `px-3 py-1 text-xs font-bold rounded-full ${isReviewer ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/30' : 'bg-teal-500/20 text-teal-300 border border-teal-500/30'}`;
+          
+          this.loadDrillPool(isReviewer ? 'reviewer' : 'variant');
+        } else if (newMode === 'sim') {
+          document.getElementById('sim-view').classList.remove('hidden');
+          this.startSimExam();
+        }
+      }
+
+      loadDrillPool(sourceFilter) {
+        let pool = QUESTION_BANK.filter(q => sourceFilter === 'all' || q.source === sourceFilter);
+        
+        const shuffleQ = document.getElementById('toggle-shuffle-q').checked;
+        const shuffleC = document.getElementById('toggle-shuffle-c').checked;
+
+        if (shuffleQ) {
+          pool = this.shuffleArray([...pool]);
+        }
+
+        this.questions = pool.map(q => {
+          let choices = [...q.choices];
+          let correctIdx = q.answer;
+
+          if (shuffleC) {
+            const mapped = choices.map((c, i) => ({ text: c, isCorrect: i === correctIdx }));
+            const shuffledMapped = this.shuffleArray(mapped);
+            choices = shuffledMapped.map(m => m.text);
+            correctIdx = shuffledMapped.findIndex(m => m.isCorrect);
+          }
+
+          return { ...q, choices, answer: correctIdx };
+        });
+
+        this.currentIndex = 0;
+        this.userAnswers = {};
+        this.solutionVisible = {};
+        this.renderCurrentQuestion();
+      }
+
+      onSettingsChange() {
+        if (this.mode === 'drill') this.loadDrillPool('reviewer');
+        else if (this.mode === 'variant') this.loadDrillPool('variant');
+      }
+
+      resetDrill() {
+        this.onSettingsChange();
+        this.showToast('Drill Progress Reset');
+      }
+
+      shuffleArray(arr) {
+        for (let i = arr.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [arr[i], arr[j]] = [arr[j], arr[i]];
+        }
+        return arr;
+      }
+
+      renderCurrentQuestion() {
+        const q = this.questions[this.currentIndex];
+        if (!q) return;
+
+        document.getElementById('current-q-num').textContent = this.currentIndex + 1;
+        document.getElementById('total-q-num').textContent = this.questions.length;
+        document.getElementById('q-topic-tag').textContent = `[${q.topic}]`;
+        document.getElementById('q-source-tag').textContent = `Exam Item #${q.id} (${q.source === 'reviewer' ? 'Reviewer' : 'Twist'})`;
+
+        document.getElementById('q-text-body').innerHTML = q.q;
+
+        const optionsGrid = document.getElementById('options-grid');
+        optionsGrid.innerHTML = '';
+
+        const letters = ['A', 'B', 'C', 'D'];
+        const selectedIdx = this.userAnswers[q.id];
+        const isAnswered = selectedIdx !== undefined;
+
+        q.choices.forEach((choiceText, idx) => {
+          const btn = document.createElement('button');
+          btn.onclick = () => this.selectChoice(idx);
+          btn.className = `p-4 rounded-xl border text-left font-sans text-sm flex items-start gap-3 transition-all duration-200 relative ${
+            !isAnswered ? 'bg-navy-900 border-navy-600 hover:border-cyan-500 hover:bg-navy-700/60 text-slate-200' :
+            idx === q.answer ? 'bg-emerald-950/80 border-emerald-500 text-emerald-100 glow-emerald font-semibold' :
+            idx === selectedIdx ? 'bg-rose-950/80 border-rose-500 text-rose-100 glow-rose' :
+            'bg-navy-900/50 border-navy-700 text-slate-500 opacity-60'
+          }`;
+
+          btn.innerHTML = `
+            <span class="w-6 h-6 rounded-lg bg-navy-800 border border-navy-600 flex items-center justify-center text-xs font-bold font-mono text-cyan-400 shrink-0">
+              ${letters[idx]}
+            </span>
+            <div class="flex-1 leading-snug">${choiceText}</div>
+          `;
+
+          optionsGrid.appendChild(btn);
+        });
+
+        // Instant Feedback Banner & Solution Coaching Card
+        const feedbackBanner = document.getElementById('instant-feedback-banner');
+        const coachingCard = document.getElementById('solution-coaching-card');
+
+        if (isAnswered) {
+          const isCorrect = selectedIdx === q.answer;
+          feedbackBanner.classList.remove('hidden');
+
+          if (isCorrect) {
+            feedbackBanner.className = 'p-4 rounded-xl border border-emerald-500/50 bg-emerald-950/40 flex items-center justify-between gap-4 transition-all glow-emerald';
+            document.getElementById('feedback-icon-box').className = 'w-8 h-8 rounded-full bg-emerald-500 text-navy-900 flex items-center justify-center font-bold text-lg';
+            document.getElementById('feedback-icon-box').textContent = '✓';
+            document.getElementById('feedback-title').className = 'font-bold text-sm text-emerald-300';
+            document.getElementById('feedback-title').textContent = 'Nailed It! Board-Ready Solution';
+            document.getElementById('feedback-sub').textContent = `+15 XP Earned • Current Streak: ${this.streak}x`;
+          } else {
+            feedbackBanner.className = 'p-4 rounded-xl border border-rose-500/50 bg-rose-950/40 flex items-center justify-between gap-4 transition-all glow-rose';
+            document.getElementById('feedback-icon-box').className = 'w-8 h-8 rounded-full bg-rose-500 text-white flex items-center justify-center font-bold text-lg';
+            document.getElementById('feedback-icon-box').textContent = '✕';
+            document.getElementById('feedback-title').className = 'font-bold text-sm text-rose-300';
+            document.getElementById('feedback-title').textContent = 'Incorrect - Review Dual-Method Coaching Below';
+            document.getElementById('feedback-sub').textContent = `Correct choice was ${letters[q.answer]}`;
+          }
+
+          // Auto-expand solution if wrong or if user toggled it
+          if (!isCorrect || this.solutionVisible[q.id]) {
+            coachingCard.classList.remove('hidden');
+          } else {
+            coachingCard.classList.add('hidden');
+          }
+
+          document.getElementById('manual-solution-body').innerHTML = q.manual;
+          document.getElementById('calc-solution-body').innerHTML = q.calc;
+
+        } else {
+          feedbackBanner.classList.add('hidden');
+          coachingCard.classList.add('hidden');
+        }
+
+        // Disable/Enable Nav buttons
+        document.getElementById('btn-prev-q').disabled = this.currentIndex === 0;
+      }
+
+      selectChoice(choiceIdx) {
+        const q = this.questions[this.currentIndex];
+        if (this.userAnswers[q.id] !== undefined) return; // Already answered
+
+        this.userAnswers[q.id] = choiceIdx;
+        const isCorrect = choiceIdx === q.answer;
+
+        if (isCorrect) {
+          this.streak++;
+          this.xp += 15 + Math.min(20, this.streak * 2);
+          this.sound.playCorrect();
+          if (this.streak >= 3) {
+            this.confetti.burst();
+            this.sound.playStreak();
+            this.showToast(`🔥 ${this.streak}x Streak!`, 'Bonus XP Awarded!', 'success');
+          } else {
+            this.showToast('Correct! +15 XP', '', 'success');
+          }
+        } else {
+          this.streak = 0;
+          this.sound.playWrong();
+          this.showToast('Incorrect!', 'Study the dual-method breakdown below', 'error');
+        }
+
+        this.updateGamificationHUD();
+        this.renderCurrentQuestion();
+      }
+
+      toggleSolutionVisibility() {
+        const q = this.questions[this.currentIndex];
+        this.solutionVisible[q.id] = !this.solutionVisible[q.id];
+        this.renderCurrentQuestion();
+      }
+
+      nextQuestion() {
+        if (this.currentIndex < this.questions.length - 1) {
+          this.currentIndex++;
+          this.renderCurrentQuestion();
+        } else {
+          this.showToast('End of question deck!', 'Resetting or switching mode');
+        }
+      }
+
+      prevQuestion() {
+        if (this.currentIndex > 0) {
+          this.currentIndex--;
+          this.renderCurrentQuestion();
+        }
+      }
+
+      // ----------------- BOARD EXAM SIMULATION MODE -----------------
+      startSimExam() {
+        // Randomly pick 20 items from total pool
+        this.simQuestions = this.shuffleArray([...QUESTION_BANK]).slice(0, 20);
+        this.simCurrentIndex = 0;
+        this.simAnswers = {};
+        this.simFlags = {};
+        this.simTimerSeconds = 30 * 60;
+
+        if (this.simTimerInterval) clearInterval(this.simTimerInterval);
+        this.simTimerInterval = setInterval(() => this.tickSimTimer(), 1000);
+
+        this.renderSimQuestion();
+        this.renderSimNavigator();
+      }
+
+      tickSimTimer() {
+        if (this.simTimerSeconds > 0) {
+          this.simTimerSeconds--;
+          const m = Math.floor(this.simTimerSeconds / 60);
+          const s = this.simTimerSeconds % 60;
+          document.getElementById('sim-timer').textContent = `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+        } else {
+          clearInterval(this.simTimerInterval);
+          this.showToast('⏱️ Time Expired!', 'Submitting Exam Automatically...', 'error');
+          this.submitSimExam();
+        }
+      }
+
+      renderSimQuestion() {
+        const q = this.simQuestions[this.simCurrentIndex];
+        if (!q) return;
+
+        document.getElementById('sim-current-num').textContent = this.simCurrentIndex + 1;
+        document.getElementById('sim-total-num').textContent = this.simQuestions.length;
+        document.getElementById('sim-q-topic').textContent = `[${q.topic}]`;
+        document.getElementById('sim-q-text').innerHTML = q.q;
+
+        const optionsGrid = document.getElementById('sim-options-grid');
+        optionsGrid.innerHTML = '';
+
+        const letters = ['A', 'B', 'C', 'D'];
+        const selectedIdx = this.simAnswers[q.id];
+
+        q.choices.forEach((choiceText, idx) => {
+          const btn = document.createElement('button');
+          btn.onclick = () => {
+            this.simAnswers[q.id] = idx;
+            this.renderSimQuestion();
+            this.renderSimNavigator();
+          };
+          btn.className = `p-4 rounded-xl border text-left font-sans text-sm flex items-start gap-3 transition-all ${
+            selectedIdx === idx ? 'bg-cyan-950/80 border-cyan-400 text-cyan-100 font-semibold glow-cyan' :
+            'bg-navy-900 border-navy-600 hover:border-slate-500 text-slate-200'
+          }`;
+
+          btn.innerHTML = `
+            <span class="w-6 h-6 rounded-lg bg-navy-800 border border-navy-600 flex items-center justify-center text-xs font-bold font-mono text-cyan-400 shrink-0">
+              ${letters[idx]}
+            </span>
+            <div class="flex-1 leading-snug">${choiceText}</div>
+          `;
+
+          optionsGrid.appendChild(btn);
+        });
+
+        // Flag button status
+        const isFlagged = !!this.simFlags[q.id];
+        document.getElementById('sim-flag-icon').textContent = isFlagged ? '🚩' : '🏳️';
+        document.getElementById('sim-flag-text').textContent = isFlagged ? 'Flagged' : 'Flag for Review';
+        document.getElementById('btn-sim-flag').className = `flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-semibold transition ${
+          isFlagged ? 'bg-amber-500 text-navy-900 border-amber-400 font-bold' : 'bg-navy-700 border-navy-600 text-amber-400 hover:bg-navy-600'
+        }`;
+      }
+
+      toggleSimFlag() {
+        const q = this.simQuestions[this.simCurrentIndex];
+        this.simFlags[q.id] = !this.simFlags[q.id];
+        this.renderSimQuestion();
+        this.renderSimNavigator();
+      }
+
+      renderSimNavigator() {
+        const grid = document.getElementById('sim-nav-grid');
+        grid.innerHTML = '';
+
+        this.simQuestions.forEach((q, idx) => {
+          const btn = document.createElement('button');
+          btn.onclick = () => {
+            this.simCurrentIndex = idx;
+            this.renderSimQuestion();
+            this.renderSimNavigator();
+          };
+
+          const isCurrent = idx === this.simCurrentIndex;
+          const isAnswered = this.simAnswers[q.id] !== undefined;
+          const isFlagged = !!this.simFlags[q.id];
+
+          btn.className = `w-full h-10 rounded-lg text-xs font-mono font-bold transition flex items-center justify-center relative ${
+            isCurrent ? 'ring-2 ring-cyan-400 bg-cyan-500 text-navy-900' :
+            isFlagged ? 'bg-amber-500 text-navy-900 border border-amber-400' :
+            isAnswered ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40' :
+            'bg-navy-900 text-slate-400 border border-navy-600 hover:bg-navy-700'
+          }`;
+
+          btn.textContent = idx + 1;
+          grid.appendChild(btn);
+        });
+      }
+
+      nextSimQuestion() {
+        if (this.simCurrentIndex < this.simQuestions.length - 1) {
+          this.simCurrentIndex++;
+          this.renderSimQuestion();
+          this.renderSimNavigator();
+        }
+      }
+
+      prevSimQuestion() {
+        if (this.simCurrentIndex > 0) {
+          this.simCurrentIndex--;
+          this.renderSimQuestion();
+          this.renderSimNavigator();
+        }
+      }
+
+      confirmSubmitSim() {
+        const answeredCount = Object.keys(this.simAnswers).length;
+        if (answeredCount < 20) {
+          if (!confirm(`You have answered ${answeredCount} of 20 items. Are you sure you want to submit?`)) return;
+        }
+        this.submitSimExam();
+      }
+
+      submitSimExam() {
+        if (this.simTimerInterval) clearInterval(this.simTimerInterval);
+
+        let correctCount = 0;
+        this.simQuestions.forEach(q => {
+          if (this.simAnswers[q.id] === q.answer) correctCount++;
+        });
+
+        const percent = Math.round((correctCount / 20) * 100);
+        const passed = percent >= 70;
+
+        // Hide Sim View, Show Results View
+        document.getElementById('sim-view').classList.add('hidden');
+        document.getElementById('sim-results-view').classList.remove('hidden');
+
+        // Populate Summary
+        document.getElementById('results-score-percent').textContent = `${percent}%`;
+        document.getElementById('results-score-fraction').textContent = `${correctCount}/20 Correct`;
+
+        const badge = document.getElementById('results-score-badge');
+        const pill = document.getElementById('results-status-pill');
+        const title = document.getElementById('results-status-title');
+        const desc = document.getElementById('results-status-desc');
+        const gaugeFill = document.getElementById('results-gauge-fill');
+
+        gaugeFill.style.width = `${percent}%`;
+
+        if (passed) {
+          this.sound.playStreak();
+          this.confetti.burst();
+          this.xp += 100;
+          this.updateGamificationHUD();
+
+          badge.className = 'w-24 h-24 rounded-full flex flex-col items-center justify-center font-bold border-4 border-emerald-500 bg-emerald-950 text-emerald-300 glow-emerald';
+          pill.className = 'w-fit px-3 py-1 rounded-full text-xs font-extrabold uppercase tracking-wider bg-emerald-500 text-navy-900';
+          pill.textContent = 'PASSED (BOARD READY)';
+          title.textContent = '🎉 Congratulations, Future R.ECE!';
+          desc.textContent = 'You cleared the ECE Board Exam 70% benchmark in Vector Analysis & Integral Theorems! Outstanding performance.';
+          gaugeFill.className = 'h-full bg-emerald-500 transition-all duration-700';
+        } else {
+          this.sound.playWrong();
+          badge.className = 'w-24 h-24 rounded-full flex flex-col items-center justify-center font-bold border-4 border-rose-500 bg-rose-950 text-rose-300 glow-rose';
+          pill.className = 'w-fit px-3 py-1 rounded-full text-xs font-extrabold uppercase tracking-wider bg-rose-500 text-white';
+          pill.textContent = 'FAILED (NEEDS DRILLING)';
+          title.textContent = 'Keep Pushing! Almost There.';
+          desc.textContent = 'You missed the 70% board passing score. Use the "Practice Missed Questions Only" filter below to lock in the key concepts.';
+          gaugeFill.className = 'h-full bg-rose-500 transition-all duration-700';
+        }
+
+        this.renderResultsReviewList(false);
+      }
+
+      filterResultsReview(filterType) {
+        if (filterType === 'missed') {
+          this.renderResultsReviewList(true);
+        }
+      }
+
+      renderResultsReviewList(missedOnly = false) {
+        const list = document.getElementById('results-questions-list');
+        list.innerHTML = '';
+
+        const letters = ['A', 'B', 'C', 'D'];
+
+        this.simQuestions.forEach((q, idx) => {
+          const userSel = this.simAnswers[q.id];
+          const isCorrect = userSel === q.answer;
+
+          if (missedOnly && isCorrect) return;
+
+          const card = document.createElement('div');
+          card.className = `bg-navy-800 rounded-2xl border p-6 flex flex-col gap-4 shadow-lg ${
+            isCorrect ? 'border-emerald-500/40' : 'border-rose-500/40'
+          }`;
+
+          card.innerHTML = `
+            <div class="flex items-center justify-between border-b border-navy-700 pb-3">
+              <div class="flex items-center gap-2">
+                <span class="px-2.5 py-0.5 rounded-md text-xs font-semibold ${isCorrect ? 'bg-emerald-500/20 text-emerald-300' : 'bg-rose-500/20 text-rose-300'}">
+                  ${isCorrect ? '✓ Correct' : '✕ Incorrect'}
+                </span>
+                <span class="text-xs font-mono text-slate-400">Item #${idx + 1} • [${q.topic}]</span>
+              </div>
+              <span class="text-xs text-slate-400">Your Choice: ${userSel !== undefined ? letters[userSel] : 'None'} | Correct: ${letters[q.answer]}</span>
+            </div>
+
+            <div class="text-base text-slate-100">${q.q}</div>
+
+            <!-- Dual Solution Breakdown -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-2 border-t border-navy-700 pt-4">
+              <div class="bg-navy-900 rounded-xl p-4 border border-navy-700">
+                <h4 class="font-bold text-xs uppercase text-emerald-400 mb-2">📝 Manual Solution</h4>
+                <div class="text-xs text-slate-300 leading-relaxed">${q.manual}</div>
+              </div>
+              <div class="bg-navy-900 rounded-xl p-4 border border-amber-500/30">
+                <h4 class="font-bold text-xs uppercase text-amber-400 mb-2">🧮 Canon F-789SGA Keystrokes</h4>
+                <div class="text-xs text-slate-300 leading-relaxed">${q.calc}</div>
+              </div>
+            </div>
+          `;
+
+          list.appendChild(card);
+        });
+      }
+
+      // Keyboard Shortcuts Handler
+      handleKeydown(e) {
+        if (document.querySelector('.modal:not(.hidden)')) return;
+
+        const key = e.key.toUpperCase();
+
+        if (this.mode === 'drill' || this.mode === 'variant') {
+          if (['1', 'A'].includes(key)) this.selectChoice(0);
+          else if (['2', 'B'].includes(key)) this.selectChoice(1);
+          else if (['3', 'C'].includes(key)) this.selectChoice(2);
+          else if (['4', 'D'].includes(key)) this.selectChoice(3);
+          else if (key === 'ENTER' || key === 'ARROWRIGHT') this.nextQuestion();
+          else if (key === 'ARROWLEFT') this.prevQuestion();
+        } else if (this.mode === 'sim') {
+          if (key === 'F') this.toggleSimFlag();
+          else if (key === 'ARROWRIGHT') this.nextSimQuestion();
+          else if (key === 'ARROWLEFT') this.prevSimQuestion();
+        }
+      }
+
+      openModal(id) {
+        document.getElementById(id).classList.remove('hidden');
+      }
+
+      closeModal(id) {
+        document.getElementById(id).classList.add('hidden');
+      }
+    }
+
+    // Initialize App on Window Load
+    let app;
+    window.onload = function() {
+      app = new EmagsApp();
+    };
+  </script>
+</body>
+</html>
